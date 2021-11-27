@@ -11,6 +11,7 @@ const MyTextField= ({label,type, ...props}) => {
       type={type}
       {...field}
       fullWidth
+      autoComplete="off"
       helperText={errorText}
       error={!!errorText}
     />
