@@ -10,7 +10,7 @@ const Title = styled("h1")(({ theme }) => ({
   marginTop: 0,
 }));
 
-const Layout = styled(Paper)(({ theme }) => ({
+const PaperContents = styled(Paper)(({ theme }) => ({
   ...theme.typography.body2,
   padding: theme.spacing(2),
   color: theme.palette.text.secondary,
@@ -46,7 +46,7 @@ const FilterItem = styled("div")(({ theme }) => ({
 const FilterSelect = styled("div")(({ theme }) => ({}));
 const Contents = ({ search }) => {
   return (
-    <Layout>
+    <PaperContents>
       {search ? (
         <>
           <TitleSearch>
@@ -77,7 +77,7 @@ const Contents = ({ search }) => {
             );
           })}
       </Grid>
-    </Layout>
+    </PaperContents>
   );
 };
 

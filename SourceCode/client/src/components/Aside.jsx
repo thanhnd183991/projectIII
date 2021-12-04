@@ -9,15 +9,15 @@ const Title = styled("h1")(({ theme }) => ({
   marginTop: 0,
 }));
 
-const Layout = styled(Paper)(({ theme }) => ({
+const PaperAside = styled(Paper)(({ theme }) => ({
   ...theme.typography.body2,
   padding: theme.spacing(2),
   color: theme.palette.text.secondary,
 }));
 
-const Contents = () => {
+const Aside = () => {
   return (
-    <Layout>
+    <PaperAside>
       <Title>Có thể quan tâm</Title>
       <Grid container spacing={2}>
         {Array(5)
@@ -30,8 +30,8 @@ const Contents = () => {
             );
           })}
       </Grid>
-    </Layout>
+    </PaperAside>
   );
 };
 
-export default Contents;
+export default Aside;

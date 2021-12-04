@@ -1,8 +1,7 @@
-import React from "react";
-import { Box } from "@mui/material";
-import { styled } from "@mui/material/styles";
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import { styled } from "@mui/material/styles";
+import React from "react";
 
 const CardContainer = styled("div")(({ theme }) => ({
   //   border: "1px solid blue",
@@ -44,20 +43,20 @@ const CardInner = styled("div")(({ theme }) => ({
   background: "rgba(0, 0, 0, 0.5)",
 }));
 
-const CardTitle = styled("div")(({ theme, x }) => ({
+export const CardTitle = styled("div")(({ theme, x }) => ({
   fontSize: 14,
   fontWeight: "bold",
   margin: "0",
 }));
 
-const CardInteraction = styled("div")(({ theme, x }) => ({
+export const CardInteraction = styled("div")(({ theme, x }) => ({
   display: "flex",
   alignItems: "center",
   gap: "10px",
   justifyContent: "flex-start",
 }));
 
-const CardReact = styled("div")(({ theme, x }) => ({
+export const CardReact = styled("div")(({ theme, x }) => ({
   display: "flex",
   alignItems: "center",
   fontSize: "12px",
@@ -71,25 +70,48 @@ const CardReact = styled("div")(({ theme, x }) => ({
   },
 }));
 
-const Card = ({ movie, x }) => {
+const CardContentWatchButton = styled("div")(({ theme, x }) => ({
+  width: "120px",
+  height: "40px",
+  color: "white",
+  background: "#FC2222",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  borderRadius: "15px",
+  fontWeight: "bold",
+  cursor: "pointer",
+  alignSelf: "center",
+  "&:hover": {
+    background: "red",
+  },
+}));
+
+const CardContent = ({ movie, inDetail }) => {
   return (
     <CardContainer>
       <CardImage src="/images/item.jpg" />
       <CardInner>
-        <CardTitle>hello</CardTitle>
-        <CardInteraction>
-          <CardReact>
-            <VisibilityIcon />
-            <div>10.0000</div>
-          </CardReact>
-          <CardReact>
-            <ThumbUpIcon />
-            <div>1.000</div>
-          </CardReact>
-        </CardInteraction>
+        {inDetail ? (
+          <CardContentWatchButton>Xem</CardContentWatchButton>
+        ) : (
+          <>
+            <CardTitle>hello</CardTitle>
+            <CardInteraction>
+              <CardReact>
+                <VisibilityIcon />
+                <div>10.0000</div>
+              </CardReact>
+              <CardReact>
+                <ThumbUpIcon />
+                <div>1.000</div>
+              </CardReact>
+            </CardInteraction>
+          </>
+        )}
       </CardInner>
     </CardContainer>
   );
 };
 
-export default Card;
+export default CardContent;
