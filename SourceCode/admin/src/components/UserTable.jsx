@@ -40,21 +40,21 @@ export default function UserTable() {
       width: 130,
       sortable: false,
       renderCell: (params) => {
-        const onClick = (e) => {
-          e.stopPropagation(); // don't select this row after clicking
+        // const onClick = (e) => {
+        //   e.stopPropagation(); // don't select this row after clicking
 
-          const api = params.api;
-          const thisRow = {};
-          console.log(api);
-          api
-            .getAllColumns()
-            .filter((c) => c.field !== "__check__" && !!c)
-            .forEach(
-              (c) => (thisRow[c.field] = params.getValue(params.id, c.field))
-            );
+        //   const api = params.api;
+        //   const thisRow = {};
+        //   console.log(api);
+        //   api
+        //     .getAllColumns()
+        //     .filter((c) => c.field !== "__check__" && !!c)
+        //     .forEach(
+        //       (c) => (thisRow[c.field] = params.getValue(params.id, c.field))
+        //     );
 
-          return alert(JSON.stringify(thisRow, null, 4));
-        };
+        //   return alert(JSON.stringify(thisRow, null, 4));
+        // };
 
         return (
           <Box sx={{ display: "flex" }}>

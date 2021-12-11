@@ -1,0 +1,1 @@
+{"version":3,"sources":["webpack://src/App.css"],"names":[],"mappings":"AAAA,8BACE,sBAAuB,CACvB,4BAA8B,CAC9B,UACF","file":"main.7118c12f.chunk.css","sourcesContent":[".react-input-emoji--container {\r\n  background: transparent;\r\n  border-radius: 15px !important;\r\n  color: white;\r\n}\r\n"]}

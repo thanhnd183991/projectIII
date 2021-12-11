@@ -2,6 +2,7 @@ import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { styled } from "@mui/material/styles";
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 const CardContainer = styled("div")(({ theme }) => ({
   //   border: "1px solid blue",
@@ -88,12 +89,15 @@ const CardContentWatchButton = styled("div")(({ theme, x }) => ({
 }));
 
 const CardContent = ({ movie, inDetail }) => {
+  const navigate = useNavigate();
   return (
     <CardContainer>
       <CardImage src="/images/item.jpg" />
       <CardInner>
         {inDetail ? (
-          <CardContentWatchButton>Xem</CardContentWatchButton>
+          <CardContentWatchButton onClick={() => navigate("/watch/1")}>
+            Xem
+          </CardContentWatchButton>
         ) : (
           <>
             <CardTitle>hello</CardTitle>

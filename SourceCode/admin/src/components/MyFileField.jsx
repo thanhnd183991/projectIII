@@ -1,11 +1,8 @@
-import React, { useState } from "react";
-import { styled } from "@mui/material/styles";
-import Button from "@mui/material/Button";
-import IconButton from "@mui/material/IconButton";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
-import Stack from "@mui/material/Stack";
+import Button from "@mui/material/Button";
+import React, { useState } from "react";
 
 export default function MyFileField({ setFieldValue, src, mp4, name, label }) {
   const [infoFileMp4, setInfoFileMp4] = useState("");

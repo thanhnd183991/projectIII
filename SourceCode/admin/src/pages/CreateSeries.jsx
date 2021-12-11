@@ -1,16 +1,11 @@
-import React, { useEffect, useState } from "react";
+import { Box, Button } from "@mui/material";
+import { Form, Formik } from "formik";
+import React from "react";
 import Layout from "../components/Layout";
-import MyTextField from "../components/MyTextField";
-import { useLocation } from "react-router";
-import { Button, Box } from "@mui/material";
-import validateRegister from "../utils/validateRegister";
-import { Formik, Form } from "formik";
-import MyFileField from "../components/MyFileField";
 import MySelectField from "../components/MySelectField";
-import { movieRows } from "../dummyData";
+import MyTextField from "../components/MyTextField";
 
 const CreateSeries = () => {
-  const [data, setData] = useState(movieRows);
   return (
     <Layout>
       <Box sx={{ mb: 2, fontWeight: "bold" }}>Tạo series phim</Box>

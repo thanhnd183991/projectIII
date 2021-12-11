@@ -15,6 +15,7 @@ import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import * as React from "react";
 import { mainListItems } from "./ListItems";
+import { Link } from "react-router-dom";
 
 const drawerWidth = 240;
 
@@ -99,7 +100,9 @@ const Layout = ({ children }) => {
               noWrap
               sx={{ flexGrow: 1 }}
             >
-              Admin ProjectIII
+              <Link to="/" style={{ textDecoration: "none", color: "white" }}>
+                Admin ProjectIII
+              </Link>
             </Typography>
             <IconButton color="inherit">
               <Badge badgeContent={4} color="secondary">

@@ -1,15 +1,7 @@
-import React from "react";
-
-import Layout from "../components/Layout";
-import MyTextField from "../components/MyTextField";
-import Paper from "@mui/material/Paper";
+import { Avatar, Box, Typography } from "@mui/material";
 import Grid from "@mui/material/Grid";
-import { useLocation } from "react-router";
-import { Typography, Button, Box, Avatar } from "@mui/material";
-import validateRegister from "../utils/validateRegister";
-import { Formik, Form } from "formik";
-import MyFileField from "../components/MyFileField";
-import MySelectField from "../components/MySelectField";
+import Paper from "@mui/material/Paper";
+import React from "react";
 import { userRows } from "../dummyData";
 
 const ReactMoviePaper = ({ movie }) => {

@@ -2,7 +2,6 @@ import { Box, Button, Container, Grid, Link, Typography } from "@mui/material";
 import { Form, Formik } from "formik";
 import React from "react";
 import MyTextField from "../components/MyTextField";
-import sendEmail from "../api/sendEmail";
 
 const ForgotPassword = () => {
   return (
@@ -54,7 +53,6 @@ const ForgotPassword = () => {
                 setSubmitting(true);
                 // make async call
                 console.log("object", data);
-                await sendEmail(data.email);
                 setSubmitting(false);
               }}
             >

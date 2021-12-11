@@ -1,9 +1,8 @@
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import { Paper } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import React from "react";
 import { movies } from "../data";
-import ThumbUpIcon from "@mui/icons-material/ThumbUp";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import { Paper } from "@mui/material";
 
 const VideoPlayerContainer = styled(Paper)(({ theme }) => ({
   ...theme.typography.body2,

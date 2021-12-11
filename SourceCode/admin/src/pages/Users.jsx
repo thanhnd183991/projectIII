@@ -1,12 +1,12 @@
-import { Button, Container } from "@mui/material";
+import { Button } from "@mui/material";
 import * as React from "react";
+import { Link } from "react-router-dom";
 import Layout from "../components/Layout";
 import UserTable from "../components/UserTable";
-import { Link } from "react-router-dom";
 const Users = () => {
   return (
     <Layout>
-      <Link to="/users/1">
+      <Link to="/user/create">
         <Button variant="contained" sx={{ mb: 1 }}>
           Tạo người dùng
         </Button>

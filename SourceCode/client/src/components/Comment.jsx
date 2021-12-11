@@ -1,13 +1,6 @@
-import React, { useState } from "react";
-import CardContent from "./CardContent";
-import { movies } from "../data";
-import ThumbUpIcon from "@mui/icons-material/ThumbUp";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import { CardTitle, CardInteraction, CardReact } from "./CardContent";
+import { Avatar } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import ReactEmoji from "react-emoji";
-import InputEmoji from "react-input-emoji";
-import { Paper, Avatar } from "@mui/material";
+import React from "react";
 
 const CommentContainer = styled("div")(({ theme }) => ({
   display: "flex",

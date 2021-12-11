@@ -1,21 +1,17 @@
-import React, { useEffect, useState } from "react";
-import Layout from "../components/Layout";
-import MyTextField from "../components/MyTextField";
+import { Box, Button } from "@mui/material";
+import { Form, Formik } from "formik";
+import React from "react";
 import { useLocation } from "react-router";
-import { Button, Box } from "@mui/material";
-import validateRegister from "../utils/validateRegister";
-import { Formik, Form } from "formik";
+import Layout from "../components/Layout";
 import MyFileField from "../components/MyFileField";
+import MyTextField from "../components/MyTextField";
 import { userRows } from "../dummyData";
+import validateRegister from "../utils/validateRegister";
 
 const User = () => {
   const user = userRows[0];
   const location = useLocation();
-  useEffect(() => {
-    if (!user && !location.pathname.includes("create")) {
-      // call user from api
-    }
-  }, []);
+
   return (
     <Layout>
       <Box sx={{ mb: 2 }}>

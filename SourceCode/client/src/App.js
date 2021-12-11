@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import {
   Home,
@@ -19,16 +19,16 @@ const darkTheme = createTheme({
 });
 
 const App = () => {
+  const [user, setUser] = useState(false);
   return (
     <div>
       <CssBaseline />
-
       <ThemeProvider theme={darkTheme}>
-        <Navbar />
         <Router>
+          <Navbar user={user} setUser={setUser} />
           <Routes>
             <Route exact path="/" element={<Home />} />
-            <Route exact path="/login" element={<Login />} />
+            <Route exact path="/login" element={<Login setUser={setUser} />} />
             <Route exact path="/forgot-password" element={<ForgotPassword />} />
             <Route exact path="/search" element={<SearchMovie />} />
             <Route exact path="/detail/:id" element={<DetailMovie />} />

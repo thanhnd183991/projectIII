@@ -1,18 +1,13 @@
-import React, { useEffect, useState } from "react";
-import Layout from "../components/Layout";
-import MyTextField from "../components/MyTextField";
+import { Box, Button } from "@mui/material";
+import { Form, Formik } from "formik";
+import React from "react";
 import { useLocation } from "react-router";
-import { Button, Box } from "@mui/material";
-import { Formik, Form } from "formik";
+import Layout from "../components/Layout";
 import MyFileField from "../components/MyFileField";
 import MySelectField from "../components/MySelectField";
+import MyTextField from "../components/MyTextField";
 const CreateMovie = ({ movie }) => {
   const location = useLocation();
-  useEffect(() => {
-    if (!movie && !location.pathname.includes("create")) {
-      // call user from api
-    }
-  }, [location.pathname]);
   return (
     <Layout>
       <Box sx={{ mb: 2, fontWeight: "bold" }}>

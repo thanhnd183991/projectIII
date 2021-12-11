@@ -1,5 +1,4 @@
 import React from "react";
-import { Box } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import VisibilityIcon from "@mui/icons-material/Visibility";

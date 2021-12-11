@@ -10,12 +10,15 @@ import AppBar from "@mui/material/AppBar";
 import Badge from "@mui/material/Badge";
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
+import Button from "@mui/material/Button";
 import InputBase from "@mui/material/InputBase";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import { alpha, styled } from "@mui/material/styles";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
+import Link from "./Link";
+import { useNavigate } from "react-router-dom";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -125,10 +128,12 @@ const Option = styled("div")(({ theme }) => ({
     },
   },
 }));
-export default function Navbar() {
+export default function Navbar({ user, setUser }) {
+  const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [search, setSearch] = useState("");
 
   window.onscroll = () => {
     setIsScrolled(window.pageYOffset === 0 ? false : true);
@@ -137,6 +142,16 @@ export default function Navbar() {
 
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
+
+  const handleChange = (event) => {
+    event.preventDefault();
+    setSearch(event.target.value);
+    console.log(search);
+  };
+  const handleSearchSubmit = (event) => {
+    event.preventDefault();
+    navigate("/search");
+  };
 
   const handleProfileMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -147,6 +162,8 @@ export default function Navbar() {
   };
 
   const handleMenuClose = () => {
+    setUser(false);
+    navigate("/login");
     setAnchorEl(null);
     handleMobileMenuClose();
   };
@@ -157,14 +174,19 @@ export default function Navbar() {
 
   const ListOptions = () => (
     <Box sx={{ display: { xs: "flex" } }}>
-      <Option>
-        <MovieIcon />
-        <span>Phim lẻ</span>
-      </Option>
-      <Option>
-        <LocalMoviesIcon />
-        <span>Phim bộ</span>
-      </Option>
+      <Link to="/search">
+        <Option>
+          <MovieIcon />
+          <span>Phim lẻ</span>
+        </Option>
+      </Link>
+
+      <Link to="/search">
+        <Option>
+          <LocalMoviesIcon />
+          <span>Phim bộ</span>
+        </Option>
+      </Link>
       <Option>
         <FormatListBulletedIcon />
         <span>Thể loại</span>
@@ -179,7 +201,9 @@ export default function Navbar() {
           {Array(20)
             .fill("genre")
             .map((el, i) => (
-              <li key={i}>{el}</li>
+              <li key={i} onClick={() => navigate("/search")}>
+                {el}
+              </li>
             ))}
         </ul>
       </Option>
@@ -260,19 +284,29 @@ export default function Navbar() {
         position="fixed"
       >
         <Toolbar sx={{ mb: 0 }}>
-          <Typography variant="h6" noWrap component="div">
-            <Logo src="/images/logo.png" />
-          </Typography>
+          <Link to="/">
+            <Typography variant="h6" noWrap component="div">
+              <Logo src="/images/logo.png" />
+            </Typography>
+          </Link>
           <ListOptions />
           <Box sx={{ flexGrow: 1 }} />
           <Search>
             <SearchIconWrapper>
               <SearchIcon />
             </SearchIconWrapper>
-            <StyledInputBase
-              placeholder="Search…"
-              inputProps={{ "aria-label": "search" }}
-            />
+            <form onSubmit={(e) => handleSearchSubmit(e)}>
+              <StyledInputBase
+                placeholder="Search…"
+                onChange={(e) => handleChange(e)}
+                value={search}
+                inputProps={{ "aria-label": "search" }}
+                // onKeyDown={(e) => handleKeyDown(e)}
+              />
+              <button type="submit" hidden>
+                Submit
+              </button>
+            </form>
           </Search>
           <Box sx={{ display: { xs: "none", md: "flex" } }}>
             <IconButton
@@ -284,17 +318,39 @@ export default function Navbar() {
                 <NotificationsIcon />
               </Badge>
             </IconButton>
-            <IconButton
-              size="large"
-              edge="end"
-              aria-label="account of current user"
-              aria-controls={menuId}
-              aria-haspopup="true"
-              onClick={handleProfileMenuOpen}
-              color="inherit"
-            >
-              <AccountCircle />
-            </IconButton>
+            {user ? (
+              <IconButton
+                size="large"
+                edge="end"
+                aria-label="account of current user"
+                aria-controls={menuId}
+                aria-haspopup="true"
+                // onClick={handleProfileMenuOpen}
+                onClick={() => {
+                  setUser(false);
+                  navigate("/login");
+                }}
+                color="inherit"
+              >
+                <AccountCircle />
+              </IconButton>
+            ) : (
+              <Button
+                size="small"
+                edge="end"
+                xs={{ ml: "5px" }}
+                aria-label="account of current user"
+                aria-controls={menuId}
+                aria-haspopup="true"
+                onClick={() => {
+                  setUser(false);
+                  navigate("/login");
+                }}
+                color="inherit"
+              >
+                Đăng nhập
+              </Button>
+            )}
           </Box>
           <Box sx={{ display: { xs: "flex", md: "none" } }}>
             <IconButton

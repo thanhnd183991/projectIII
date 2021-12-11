@@ -3,7 +3,7 @@ import { experimentalStyled as styled } from "@mui/material/styles";
 import React from "react";
 import CardContent from "./CardContent";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-
+import Link from "./Link";
 const Title = styled("h1")(({ theme }) => ({
   fontSize: "18px",
   fontWeight: "bold",
@@ -72,7 +72,9 @@ const Contents = ({ search }) => {
           .map((el, index) => {
             return (
               <Grid item xs={12} sm={6} md={4} lg={3} key={index}>
-                <CardContent />
+                <Link to="/detail/1">
+                  <CardContent />
+                </Link>
               </Grid>
             );
           })}

@@ -6,11 +6,10 @@ const MyTextField = ({ label, type, ...props }) => {
   const errorText = meta.error && meta.touched ? meta.error : "";
   return (
     <TextField
-      sx={{ my: 1 }}
+      sx={{ my: 1, width: "30%" }}
       label={label}
       type={type}
       {...field}
-      sx={{ width: "30%" }}
       autoComplete="off"
       helperText={errorText}
       error={!!errorText}

@@ -1,14 +1,8 @@
-import React, { useState } from "react";
-import CardContent from "./CardContent";
-import { movies } from "../data";
-import ThumbUpIcon from "@mui/icons-material/ThumbUp";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import { CardTitle, CardInteraction, CardReact } from "./CardContent";
+import { Avatar, Paper } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import ReactEmoji from "react-emoji";
+import React, { useState } from "react";
 import InputEmoji from "react-input-emoji";
 import Comment from "./Comment";
-import { Paper, Avatar } from "@mui/material";
 const CommentsContainer = styled(Paper)(({ theme }) => ({
   ...theme.typography.body2,
   padding: theme.spacing(2),
@@ -31,7 +25,6 @@ const CommentsContent = styled("div")(({ theme }) => ({
 
 const Comments = () => {
   const [inputComment, setInputComment] = useState("");
-  const movie = movies[0];
 
   const handleComment = async (e) => {
     e.preventDefault();

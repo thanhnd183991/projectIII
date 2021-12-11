@@ -1,10 +1,10 @@
-import { Button, Container } from "@mui/material";
+import { Button } from "@mui/material";
 import * as React from "react";
+import { Link } from "react-router-dom";
 import Layout from "../components/Layout";
 import MovieTable from "../components/MovieTable";
 import SeriesTable from "../components/SeriesTable";
-import { Link } from "react-router-dom";
-import { seriesRows, movieRows } from "../dummyData";
+import { movieRows, seriesRows } from "../dummyData";
 const Products = ({ movies, series }) => {
   return (
     <Layout>

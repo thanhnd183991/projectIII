@@ -2,6 +2,7 @@ import { Grid, Paper } from "@mui/material";
 import { experimentalStyled as styled } from "@mui/material/styles";
 import React from "react";
 import CardAside from "./CardAside";
+import Link from "./Link";
 
 const Title = styled("h1")(({ theme }) => ({
   fontSize: "18px",
@@ -25,7 +26,9 @@ const Aside = () => {
           .map((el, index) => {
             return (
               <Grid item xs={6} sm={6} md={12} key={index}>
-                <CardAside />
+                <Link to="/detail/1">
+                  <CardAside />
+                </Link>
               </Grid>
             );
           })}

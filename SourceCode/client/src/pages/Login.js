@@ -4,12 +4,14 @@ import { Form, Formik } from "formik";
 import React, { useState } from "react";
 import MyTextField from "../components/MyTextField";
 import validateRegister from "../utils/validateRegister";
+import { useNavigate } from "react-router-dom";
 const LoginContainer = styled("div")(({ theme }) => ({
   margin: "auto",
   width: "446px",
 }));
 
-const Login = () => {
+const Login = ({ setUser }) => {
+  const navigate = useNavigate();
   const [isRegister, setIsRegister] = useState(false);
   return (
     <Box
@@ -74,7 +76,8 @@ const Login = () => {
             onSubmit={(data, { setSubmitting }) => {
               setSubmitting(true);
               // make async call
-              console.log("submit: ", data);
+              setUser(true);
+              navigate("/");
               setSubmitting(false);
             }}
           >

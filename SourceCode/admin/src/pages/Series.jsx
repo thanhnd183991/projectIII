@@ -1,9 +1,8 @@
 import Box from "@mui/material/Box";
 import * as React from "react";
-import Layout from "../components/Layout";
 import Card from "../components/Card";
+import Layout from "../components/Layout";
 import { movieRows } from "../dummyData";
-import { Typography } from "@mui/material";
 const Series = () => {
   return (
     <Layout>
