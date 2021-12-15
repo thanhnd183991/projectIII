@@ -4,3 +4,4 @@ export { default as ForgotPassword } from "./ForgotPassword";
 export { default as SearchMovie } from "./SearchMovie";
 export { default as DetailMovie } from "./DetailMovie";
 export { default as WatchMovie } from "./WatchMovie";
+export { default as User } from "./User";

@@ -6,6 +6,7 @@ const authRoute = require("./routes/auth");
 const userRoute = require("./routes/users");
 const movieRoute = require("./routes/movies");
 const seriesRoute = require("./routes/series");
+const filesRoute = require("./routes/files");
 const cors = require("cors");
 
 dotenv.config();
@@ -27,6 +28,7 @@ app.use("/api/auth", authRoute);
 app.use("/api/users", userRoute);
 app.use("/api/movies", movieRoute);
 app.use("/api/series", seriesRoute);
+app.use("/api/files", filesRoute);
 
 app.listen(5000, () => {
   console.log("Backend server is running!");

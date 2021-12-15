@@ -1,24 +1,24 @@
-import React, { useState } from "react";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
 import LocalMoviesIcon from "@mui/icons-material/LocalMovies";
-import MoreIcon from "@mui/icons-material/MoreVert";
 import MovieIcon from "@mui/icons-material/Movie";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import SearchIcon from "@mui/icons-material/Search";
 import AppBar from "@mui/material/AppBar";
+import Avatar from "@mui/material/Avatar";
 import Badge from "@mui/material/Badge";
 import Box from "@mui/material/Box";
-import IconButton from "@mui/material/IconButton";
 import Button from "@mui/material/Button";
+import IconButton from "@mui/material/IconButton";
 import InputBase from "@mui/material/InputBase";
-import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
 import { alpha, styled } from "@mui/material/styles";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
-import Link from "./Link";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { logout, update } from "../redux/authSlice";
+import Link from "./Link";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -128,60 +128,45 @@ const Option = styled("div")(({ theme }) => ({
     },
   },
 }));
-export default function Navbar({ user, setUser }) {
+export default function Navbar() {
   const navigate = useNavigate();
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
+  const dispatch = useDispatch();
+  const { userInfo } = useSelector((state) => state.auth);
+
   const [isScrolled, setIsScrolled] = useState(false);
   const [search, setSearch] = useState("");
+  useEffect(() => {
+    console.log("navbar run update user");
+    if (localStorage.getItem("userInfo")) {
+      // console.log(localStorage.getItem("userInfo"));
+      dispatch(update(JSON.parse(localStorage.getItem("userInfo"))));
+    }
+  }, [dispatch]);
 
   window.onscroll = () => {
     setIsScrolled(window.pageYOffset === 0 ? false : true);
     return () => (window.onscroll = null);
   };
 
-  const isMenuOpen = Boolean(anchorEl);
-  const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
-
   const handleChange = (event) => {
     event.preventDefault();
     setSearch(event.target.value);
-    console.log(search);
   };
   const handleSearchSubmit = (event) => {
     event.preventDefault();
-    navigate("/search");
-  };
-
-  const handleProfileMenuOpen = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleMobileMenuClose = () => {
-    setMobileMoreAnchorEl(null);
-  };
-
-  const handleMenuClose = () => {
-    setUser(false);
-    navigate("/login");
-    setAnchorEl(null);
-    handleMobileMenuClose();
-  };
-
-  const handleMobileMenuOpen = (event) => {
-    setMobileMoreAnchorEl(event.currentTarget);
+    navigate(`/search?q=${search}`);
   };
 
   const ListOptions = () => (
     <Box sx={{ display: { xs: "flex" } }}>
-      <Link to="/search">
+      <Link to="/search?type=movie">
         <Option>
           <MovieIcon />
           <span>Phim lẻ</span>
         </Option>
       </Link>
 
-      <Link to="/search">
+      <Link to="/search?type=series">
         <Option>
           <LocalMoviesIcon />
           <span>Phim bộ</span>
@@ -199,9 +184,9 @@ export default function Navbar({ user, setUser }) {
             }}
           ></Box>
           {Array(20)
-            .fill("genre")
+            .fill("War")
             .map((el, i) => (
-              <li key={i} onClick={() => navigate("/search")}>
+              <li key={i} onClick={() => navigate(`/search?genre=${el}`)}>
                 {el}
               </li>
             ))}
@@ -211,70 +196,6 @@ export default function Navbar({ user, setUser }) {
   );
 
   const menuId = "primary-search-account-menu";
-  const renderMenu = (
-    <Menu
-      anchorEl={anchorEl}
-      anchorOrigin={{
-        vertical: "top",
-        horizontal: "right",
-      }}
-      id={menuId}
-      keepMounted
-      transformOrigin={{
-        vertical: "top",
-        horizontal: "right",
-      }}
-      open={isMenuOpen}
-      onClose={handleMenuClose}
-    >
-      <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
-      <MenuItem onClick={handleMenuClose}>My account</MenuItem>
-    </Menu>
-  );
-
-  const mobileMenuId = "primary-search-account-menu-mobile";
-  const renderMobileMenu = (
-    <Menu
-      anchorEl={mobileMoreAnchorEl}
-      anchorOrigin={{
-        vertical: "top",
-        horizontal: "right",
-      }}
-      id={mobileMenuId}
-      keepMounted
-      transformOrigin={{
-        vertical: "top",
-        horizontal: "right",
-      }}
-      open={isMobileMenuOpen}
-      onClose={handleMobileMenuClose}
-    >
-      <MenuItem>
-        <IconButton
-          size="large"
-          aria-label="show 17 new notifications"
-          color="inherit"
-        >
-          <Badge badgeContent={17} color="error">
-            <NotificationsIcon />
-          </Badge>
-        </IconButton>
-        <p>Notifications</p>
-      </MenuItem>
-      <MenuItem onClick={handleProfileMenuOpen}>
-        <IconButton
-          size="large"
-          aria-label="account of current user"
-          aria-controls="primary-search-account-menu"
-          aria-haspopup="true"
-          color="inherit"
-        >
-          <AccountCircle />
-        </IconButton>
-        <p>Profile</p>
-      </MenuItem>
-    </Menu>
-  );
 
   return (
     <Box sx={{ flexGrow: 1, marginBottom: 0 }}>
@@ -284,7 +205,7 @@ export default function Navbar({ user, setUser }) {
         position="fixed"
       >
         <Toolbar sx={{ mb: 0 }}>
-          <Link to="/">
+          <Link to="/home">
             <Typography variant="h6" noWrap component="div">
               <Logo src="/images/logo.png" />
             </Typography>
@@ -308,7 +229,7 @@ export default function Navbar({ user, setUser }) {
               </button>
             </form>
           </Search>
-          <Box sx={{ display: { xs: "none", md: "flex" } }}>
+          <Box>
             <IconButton
               size="large"
               aria-label="show 17 new notifications"
@@ -318,21 +239,23 @@ export default function Navbar({ user, setUser }) {
                 <NotificationsIcon />
               </Badge>
             </IconButton>
-            {user ? (
+            {userInfo.id ? (
               <IconButton
                 size="large"
                 edge="end"
                 aria-label="account of current user"
                 aria-controls={menuId}
                 aria-haspopup="true"
-                // onClick={handleProfileMenuOpen}
                 onClick={() => {
-                  setUser(false);
-                  navigate("/login");
+                  navigate("/userInfo");
                 }}
                 color="inherit"
               >
-                <AccountCircle />
+                {userInfo.avatar ? (
+                  <Avatar src={userInfo.avatar} />
+                ) : (
+                  <AccountCircle />
+                )}
               </IconButton>
             ) : (
               <Button
@@ -343,7 +266,7 @@ export default function Navbar({ user, setUser }) {
                 aria-controls={menuId}
                 aria-haspopup="true"
                 onClick={() => {
-                  setUser(false);
+                  dispatch(logout());
                   navigate("/login");
                 }}
                 color="inherit"
@@ -352,22 +275,8 @@ export default function Navbar({ user, setUser }) {
               </Button>
             )}
           </Box>
-          <Box sx={{ display: { xs: "flex", md: "none" } }}>
-            <IconButton
-              size="large"
-              aria-label="show more"
-              aria-controls={mobileMenuId}
-              aria-haspopup="true"
-              onClick={handleMobileMenuOpen}
-              color="inherit"
-            >
-              <MoreIcon />
-            </IconButton>
-          </Box>
         </Toolbar>
       </NavBar>
-      {renderMobileMenu}
-      {renderMenu}
     </Box>
   );
 }

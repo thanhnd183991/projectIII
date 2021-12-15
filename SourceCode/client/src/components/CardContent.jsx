@@ -1,12 +1,48 @@
-import ThumbUpIcon from "@mui/icons-material/ThumbUp";
-import VisibilityIcon from "@mui/icons-material/Visibility";
 import { styled } from "@mui/material/styles";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
+const CardContent = ({ movie, inDetail }) => {
+  const navigate = useNavigate();
+  return (
+    <CardContainer>
+      <CardImage src={movie.imageTitle} />
+      <CardInner>
+        {inDetail ? (
+          <CardContentWatchButton
+            onClick={() => navigate(`/watch/${movie.id}`)}
+          >
+            Xem
+          </CardContentWatchButton>
+        ) : (
+          <>
+            <CardTitle>{movie.title}</CardTitle>
+            <CardInteraction>
+              {/* <CardReact>
+                <VisibilityIcon />
+                <div>{movie.views}</div>
+              </CardReact>
+              <CardReact>
+                <ThumbUpIcon />
+                <div>{movie.likes.length}</div>
+              </CardReact> */}
+              <CardReact>
+                <div>{movie.isSeries ? "true" : "false"}</div>
+              </CardReact>
+              <CardReact>
+                <div>{movie.year}</div>
+              </CardReact>
+            </CardInteraction>
+          </>
+        )}
+      </CardInner>
+    </CardContainer>
+  );
+};
 const CardContainer = styled("div")(({ theme }) => ({
   //   border: "1px solid blue",
-  width: "auto-fit",
+  width: "176.53px",
+  margin: "0 auto",
   height: "250px",
   transition: "0.5s",
   overflow: "hidden",
@@ -19,7 +55,7 @@ const CardImage = styled("img")(({ theme }) => ({
   transition: "0.5s",
   overflow: "hidden",
   position: "absolute",
-  width: "auto-fit",
+  width: "176.53px",
   height: "250px",
   objectFit: "cover",
   left: "50%",
@@ -48,6 +84,11 @@ export const CardTitle = styled("div")(({ theme, x }) => ({
   fontSize: 14,
   fontWeight: "bold",
   margin: "0",
+  whiteSpace: "nowrap",
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  // width: "100%",
+  wordBreak: "break-word",
 }));
 
 export const CardInteraction = styled("div")(({ theme, x }) => ({
@@ -87,35 +128,5 @@ const CardContentWatchButton = styled("div")(({ theme, x }) => ({
     background: "red",
   },
 }));
-
-const CardContent = ({ movie, inDetail }) => {
-  const navigate = useNavigate();
-  return (
-    <CardContainer>
-      <CardImage src="/images/item.jpg" />
-      <CardInner>
-        {inDetail ? (
-          <CardContentWatchButton onClick={() => navigate("/watch/1")}>
-            Xem
-          </CardContentWatchButton>
-        ) : (
-          <>
-            <CardTitle>hello</CardTitle>
-            <CardInteraction>
-              <CardReact>
-                <VisibilityIcon />
-                <div>10.0000</div>
-              </CardReact>
-              <CardReact>
-                <ThumbUpIcon />
-                <div>1.000</div>
-              </CardReact>
-            </CardInteraction>
-          </>
-        )}
-      </CardInner>
-    </CardContainer>
-  );
-};
 
 export default CardContent;

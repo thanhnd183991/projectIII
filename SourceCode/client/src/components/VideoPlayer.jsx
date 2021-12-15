@@ -2,7 +2,55 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import { Paper } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import React from "react";
-import { movies } from "../data";
+import { CardTitle } from "./CardContent";
+import Skeleton from "./MySkeleton";
+
+const VideoPlayer = ({ watch, movie, pending }) => {
+  return (
+    <VideoPlayerContainer>
+      {pending ? (
+        <Skeleton width="100%" height="470px" />
+      ) : (
+        <>
+          <VideoTitle>
+            {watch ? `Xem phim ${movie.title}` : `Trailer ${movie.title}`}
+          </VideoTitle>
+          <Video
+            progress={"true"}
+            controls
+            src={
+              watch
+                ? movie.video === null
+                  ? "https://static.pexels.com/lib/videos/free-videos.mp4"
+                  : movie.video
+                : movie.trailer === null
+                ? "https://static.pexels.com/lib/videos/free-videos.mp4"
+                : movie.trailer
+            }
+          />
+          {watch ? (
+            <>
+              <VideoPlayerInteraction>
+                <VideoPlayerReact>
+                  <VisibilityIcon />
+                  {movie.views}
+                </VideoPlayerReact>
+                <VideoPlayerReact>
+                  <VisibilityIcon />
+                  {movie?.likes?.length}
+                </VideoPlayerReact>
+              </VideoPlayerInteraction>
+              <VideoPlayerDesc>
+                <CardTitle>Thông tin phim</CardTitle>
+                {movie.desc}
+              </VideoPlayerDesc>
+            </>
+          ) : null}
+        </>
+      )}
+    </VideoPlayerContainer>
+  );
+};
 
 const VideoPlayerContainer = styled(Paper)(({ theme }) => ({
   ...theme.typography.body2,
@@ -39,30 +87,4 @@ const VideoPlayerReact = styled("div")(({ theme }) => ({
 }));
 
 const VideoPlayerDesc = styled("div")(({ theme }) => ({}));
-const VideoPlayer = ({ watch }) => {
-  const movie = movies[0];
-
-  return (
-    <VideoPlayerContainer>
-      <VideoTitle>{watch ? "Title" : "Trailer"}</VideoTitle>
-      <Video autoPlay progress controls src={movie.video} />
-      {watch ? (
-        <>
-          <VideoPlayerInteraction>
-            <VideoPlayerReact>
-              <VisibilityIcon />
-              {movie.views}
-            </VideoPlayerReact>
-            <VideoPlayerReact>
-              <VisibilityIcon />
-              1.000
-            </VideoPlayerReact>
-          </VideoPlayerInteraction>
-          <VideoPlayerDesc>{movie.desc}</VideoPlayerDesc>
-        </>
-      ) : null}
-    </VideoPlayerContainer>
-  );
-};
-
 export default VideoPlayer;

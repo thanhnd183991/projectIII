@@ -1,16 +1,35 @@
 const Series = require("../models/Series");
+const Movie = require("../models/Movie");
 const getRandomSetMovie = require("../utils/getRandomSetMovie");
+const { convertId, convertIdArray } = require("../utils/convertModel");
 //CREATE
 
 const createSeries = async (req, res) => {
   try {
-    const newSeries = await Series.create(
-      await getRandomSetMovie(req.body.title)
-    );
-    console.log(newSeries);
-    return res.status(200).json(newSeries);
+    const randomSetMovie = await getRandomSetMovie(req.body.title);
+    if (!randomSetMovie.content) {
+      return res.json({
+        errors: [
+          { field: "server", message: "not found movie to create series" },
+        ],
+      });
+    }
+    const newSeries = await Series.create(randomSetMovie);
+    randomSetMovie?.content.forEach(async (movieId) => {
+      await Movie.findByIdAndUpdate(movieId, {
+        $set: {
+          idSeries: newSeries._id,
+        },
+      });
+    });
+    return res
+      .status(200)
+      .json({ statusCode: 200, data: convertId(newSeries) });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({
+      statusCode: 500,
+      errros: [{ field: "server", message: err.message }],
+    });
   }
 };
 
@@ -19,11 +38,15 @@ const createSeries = async (req, res) => {
 const deleteSeries = async (req, res) => {
   try {
     await Series.findByIdAndDelete(req.params.id);
-    res
-      .status(201)
-      .json({ success: true, message: "The list has been delete..." });
+    res.status(201).json({
+      statusCode: 201,
+      data: { message: "The list has been delete..." },
+    });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({
+      statusCode: 500,
+      errros: [{ field: "server", message: err.message }],
+    });
   }
 };
 
@@ -32,6 +55,7 @@ const deleteSeries = async (req, res) => {
 const getSeries = async (req, res) => {
   const q = req.query.q;
   const genreQuery = req.query.genre;
+  const seriesId = req.query.seriesId;
   let list = [];
   try {
     if (q) {
@@ -60,12 +84,17 @@ const getSeries = async (req, res) => {
       })
         .select({ video: 0 })
         .limit(10);
+    } else if (seriesId) {
+      list = await Series.findById(seriesId);
     } else {
       list = await Series.aggregate([{ $sample: { size: 10 } }]);
     }
-    res.status(200).json(list);
+    res.status(200).json({ statusCode: 200, data: convertIdArray(list) });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({
+      statusCode: 500,
+      errros: [{ field: "server", message: err.message }],
+    });
   }
 };
 

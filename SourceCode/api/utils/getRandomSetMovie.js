@@ -8,7 +8,7 @@ const getRandomSetMovie = async (title) => {
 
   try {
     const movies = await Movie.aggregate([
-      { $match: { isSeries: true } },
+      { $match: { isSeries: true, idSeries: null } },
       { $sample: { size: randomNumber } },
     ]);
     let genreSet = new Set();

@@ -69,10 +69,10 @@ const Slide = ({ movie, x }) => {
         <SlideTitle>{movie.title}</SlideTitle>
         <SlideDesc>{movie.desc}</SlideDesc>
         <SlideGroupButton>
-          <Link to="/detail/1">
+          <Link to={`/detail/${movie.id}`}>
             <SlideButton>Trailer</SlideButton>
           </Link>
-          <Link to="/watch/1">
+          <Link to={`/watch/${movie.id}`}>
             <SlideButton>Xem phim</SlideButton>
           </Link>
         </SlideGroupButton>

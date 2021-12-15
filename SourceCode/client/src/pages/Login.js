@@ -5,12 +5,18 @@ import React, { useState } from "react";
 import MyTextField from "../components/MyTextField";
 import validateRegister from "../utils/validateRegister";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { loginAPI, registerAPI } from "../api/authAPI";
+import { login } from "../redux/authSlice";
+import { toErrorMap } from "../utils/toErrorMap";
+
 const LoginContainer = styled("div")(({ theme }) => ({
   margin: "auto",
   width: "446px",
 }));
 
-const Login = ({ setUser }) => {
+const Login = () => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [isRegister, setIsRegister] = useState(false);
   return (
@@ -73,12 +79,24 @@ const Login = ({ setUser }) => {
               }
               return errors;
             }}
-            onSubmit={(data, { setSubmitting }) => {
+            onSubmit={async (data, { setErrors, setSubmitting }) => {
               setSubmitting(true);
               // make async call
-              setUser(true);
-              navigate("/");
+              let response = null;
+              const { username, email, password } = data;
+              if (isRegister) {
+                response = await registerAPI({ username, email, password });
+              } else {
+                response = await loginAPI({ email, password });
+              }
+              if (response.data?.statusCode / 100 !== 2) {
+                setErrors(toErrorMap(response.data.errors));
+              }
               setSubmitting(false);
+              if (response.data.data) {
+                dispatch(login(response.data?.data));
+                navigate("/");
+              }
             }}
           >
             {({ values, errors, isSubmitting }) => (

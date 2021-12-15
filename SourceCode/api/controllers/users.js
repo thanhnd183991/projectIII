@@ -1,47 +1,90 @@
 const User = require("../models/User");
 const argon2 = require("argon2");
-
+const { convertId, convertIdArray } = require("../utils/convertModel");
+const { upload } = require("../config/diskStorage");
+const deleteFile = require("../utils/deleteFile");
+const path = require("path");
 //UPDATE
 const updateUser = async (req, res) => {
   if (req.user?.id === req.params?.id || req.user.isAdmin) {
-    if (req.body.password) {
-      req.body.password = await argon2.hash(req.body.password);
-    }
-
-    try {
-      const updatedUser = await User.findByIdAndUpdate(
-        req.params.id,
-        {
-          $set: req.body,
-        },
-        { new: true }
-      );
-      res.status(200).json(updatedUser);
-    } catch (err) {
-      res.status(500).json({ success: false, err });
-    }
+    upload(req, res, async (err) => {
+      if (err) {
+        return res.json({
+          statusCode: 500,
+          errors: [{ field: "server", message: err.message }],
+        });
+      } else {
+        if (req.body?.password) {
+          req.body.password = await argon2.hash(req.body.password);
+        }
+        const user = await User.findOne({ email: req.body.email });
+        // console.log(user);
+        if (user && String(user._id) !== req.params?.id) {
+          return res.json({
+            errors: [{ field: "email", message: "email đã tồn tại" }],
+          });
+        }
+        if (req.files[0]) {
+          const avatarFile = req.files[0];
+          const pathAvatar = `${process.env.APP_BASE_URL}/api/files?${req.files[0].fieldname}=${avatarFile.filename}`;
+          req.body.avatar = pathAvatar;
+          const user = await User.findById(req.params?.id);
+          try {
+            if (user.avatar) {
+              await deleteFile(
+                path.join(
+                  __dirname,
+                  `/../uploads/${user.avatar?.split("=")[1]}`
+                )
+              );
+            }
+          } catch (err) {
+            console.log(err.message);
+          }
+        }
+        const updatedUser = await User.findByIdAndUpdate(
+          req.params.id,
+          {
+            $set: req.body,
+          },
+          { new: true }
+        );
+        const { password, ...info } = convertId(updatedUser);
+        res.status(200).json({ statusCode: 200, data: info });
+      }
+    });
   } else {
-    res
-      .status(403)
-      .json({ success: false, message: "You can update only your account!" });
+    res.json({
+      statusCode: 403,
+      errrors: [
+        { field: "server", message: "You can update only your account!" },
+      ],
+    });
   }
 };
 
 //DELETE
 const deleteUser = async (req, res) => {
-  if (req.user.id === req.params.id) {
+  if (req.user.id === req.params.id || req.user.isAdmin) {
     try {
       await User.findByIdAndDelete(req.params.id);
-      res
-        .status(200)
-        .json({ success: true, message: "User has been deleted..." });
+      res.status(200).json({
+        statusCode: 200,
+        data: { message: "User has been deleted..." },
+      });
     } catch (err) {
-      res.status(500).json({ success: false, message: err });
+      res.json({
+        statusCode: 500,
+        errors: [{ field: "server", message: err.message }],
+      });
     }
   } else {
-    res
-      .status(403)
-      .json({ success: false, message: "You can delete only your account!" });
+    res.json({
+      statusCode: 403,
+      errrors: [
+        { field: "server", message: "You can update only your account!" },
+      ],
+    });
   }
 };
 
@@ -50,15 +93,19 @@ const findUser = async (req, res) => {
   if (req.user.id === req.params.id || req.user.isAdmin) {
     try {
       const user = await User.findById(req.params.id);
-      const { password, ...info } = user._doc;
-      res.status(200).json(info);
+      const { password, ...info } = convertId(user);
+      res.status(200).json({ statusCode: 200, data: info });
     } catch (err) {
-      res.status(500).json(err);
+      res.json({
+        statusCode: 500,
+        errors: [{ field: "server", message: err.message }],
+      });
     }
   } else {
-    return res
-      .status(403)
-      .json({ success: false, message: "you are not admin" });
+    return res.json({
+      statusCode: 403,
+      errros: [{ field: "server", message: "you are not admin" }],
+    });
   }
 };
 
@@ -70,12 +117,20 @@ const allUsers = async (req, res) => {
       const users = query
         ? await User.find().select({ password: 0 }).sort({ _id: -1 }).limit(5)
         : await User.find().select({ password: 0 });
-      return res.status(200).json(users);
+      return res
+        .status(200)
+        .json({ statusCode: 200, data: convertIdArray(users) });
     } catch (err) {
-      return res.status(500).json(err);
+      res.json({
+        statusCode: 500,
+        errors: [{ field: "server", message: err.message }],
+      });
     }
   } else {
-    res.status(403).json("You are not allowed to see all users!");
+    return res.json({
+      statusCode: 403,
+      errros: [{ field: "server", message: "you are not admin" }],
+    });
   }
 };
 
@@ -98,9 +153,12 @@ const getUserStats = async (req, res) => {
         },
       },
     ]);
-    return res.status(200).json(data);
+    return res.status(200).json({ statusCode: 200, data });
   } catch (err) {
-    return res.status(500).json(err);
+    res.json({
+      statusCode: 500,
+      errors: [{ field: "server", message: err.message }],
+    });
   }
 };
 

@@ -1,4 +1,8 @@
 const Redis = require("ioredis");
-const redis = new Redis();
+const { __prod__ } = require("../constants");
+let redis = null;
+if (__prod__) {
+  redis = new Redis();
+}
 
 module.exports = redis;

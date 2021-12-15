@@ -1,6 +1,7 @@
 import { Avatar } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import React from "react";
+import Skeleton from "./MySkeleton";
 
 const CommentContainer = styled("div")(({ theme }) => ({
   display: "flex",
@@ -19,15 +20,17 @@ const CommentMessage = styled("div")(({ theme }) => ({
   fontWeight: "normal",
 }));
 
-const Comment = () => {
-  return (
+const Comment = ({ comment }) => {
+  return comment ? (
     <CommentContainer>
-      <Avatar>A</Avatar>
+      <Avatar src={comment?.user.avatar}>A</Avatar>
       <CommentContent>
-        <CommentSender>AAAA</CommentSender>
-        <CommentMessage>lajflllafjowufonslcnlafj</CommentMessage>
+        <CommentSender>{comment.user.username}</CommentSender>
+        <CommentMessage>{comment.comment}</CommentMessage>
       </CommentContent>
     </CommentContainer>
+  ) : (
+    <Skeleton width="100%" height="50px" />
   );
 };
 

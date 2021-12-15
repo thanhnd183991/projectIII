@@ -6,6 +6,19 @@ const sendEmail = require("../utils/sendEmail.js");
 const redis = require("../config/redis.js");
 const { FORGOT_PASSWORD_PREFIX } = require("../constants.js");
 const validateRegister = require("../utils/validateRegister");
+const { convertId } = require("../utils/convertModel");
+
+// json res co dang:
+// {
+//   errors:[
+// {  field
+//   message}
+// ]
+//
+//   statusCode:
+//   data
+// }
+
 //REGISTER
 const register = async (req, res) => {
   const error = validateRegister(
@@ -14,14 +27,34 @@ const register = async (req, res) => {
     req.body.password
   );
   if (error) {
-    return res.status(500).json({ error });
+    return res.json({ error, statusCode: 500 });
   }
-  const user = await User.findOne({
-    $or: [{ email: req.body.email }, { username: req.body.username }],
+  const userByUsername = await User.findOne({
+    username: req.body.username,
   });
 
-  if (user) {
-    res.status(500).json({ success: false, message: "User already exists" });
+  const userByEmail = await User.findOne({
+    email: req.body.email,
+  });
+  let errors = [];
+  if (userByUsername) {
+    errors.push({
+      field: "username",
+      message: "trùng tên",
+    });
+  }
+  if (userByEmail) {
+    errors.push({
+      field: "email",
+      message: "trùng email",
+    });
+  }
+  if (errors.length !== 0) {
+    res.json({
+      statusCode: 500,
+      data: null,
+      errors,
+    });
     return;
   }
   const newUser = new User({
@@ -31,11 +64,28 @@ const register = async (req, res) => {
   });
   try {
     const {
-      _doc: { username, email, _id },
+      _doc: { password, ...info },
     } = await newUser.save();
-    res.status(201).json({ success: true, username, email, _id });
+    const accessToken = jwt.sign(
+      { id: info._id, isAdmin: info.isAdmin },
+      process.env.SECRET_KEY,
+      { expiresIn: "5d" }
+    );
+    res.status(201).json({
+      statusCode: 201,
+      data: { ...convertId(info), accessToken },
+    });
   } catch (err) {
-    res.status(500).json(err);
+    return res.json({
+      statusCode: 500,
+      data: null,
+      errors: [
+        {
+          field: "server",
+          message: err.message,
+        },
+      ],
+    });
   }
 };
 
@@ -45,7 +95,16 @@ const login = async (req, res) => {
   try {
     const user = await User.findOne({ email: req.body.email });
     if (!user) {
-      res.status(401).json({ success: false, message: "Wrong email!" });
+      res.json({
+        statusCode: 500,
+        data: null,
+        errors: [
+          {
+            field: "email",
+            message: "email không đúng",
+          },
+        ],
+      });
       return;
     }
 
@@ -54,11 +113,17 @@ const login = async (req, res) => {
       req.body.password
     );
 
-    if (!isTruePassword) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Wrong password!" });
-    }
+    if (!isTruePassword)
+      return res.json({
+        statusCode: 500,
+        data: null,
+        errors: [
+          {
+            field: "password",
+            message: "mật khẩu không đúng",
+          },
+        ],
+      });
 
     const accessToken = jwt.sign(
       { id: user._id, isAdmin: user.isAdmin },
@@ -66,11 +131,24 @@ const login = async (req, res) => {
       { expiresIn: "5d" }
     );
 
-    const { password, createdAt, updatedAt, ...info } = user._doc;
+    const { password, createdAt, updatedAt, _id, ...info } = user._doc;
 
-    res.status(200).json({ success: true, ...info, accessToken });
+    res.status(200).json({
+      statusCode: 200,
+      data: { id: _id, ...info, accessToken },
+      errors: null,
+    });
   } catch (err) {
-    res.status(500).json(err);
+    return res.json({
+      statusCode: 500,
+      data: null,
+      errors: [
+        {
+          field: "server",
+          message: err.message,
+        },
+      ],
+    });
   }
 };
 
@@ -78,16 +156,36 @@ const login = async (req, res) => {
 const forgotPassword = async (req, res) => {
   const user = await User.findOne({ email: req.body.email });
   if (!user) {
-    return res.status(401).json("Wrong password or username!");
+    return res.json({
+      statusCode: 500,
+      data: null,
+      errors: [
+        {
+          field: "email",
+          message: "email không đúng",
+        },
+      ],
+    });
   }
   const rs = await sendEmail(req.body.email, user._id);
   // console.log("rs", rs);
   if (rs !== "OK") {
-    return res.status(500).json({ success: false, message: rs });
+    return res.json({
+      statusCode: 500,
+      data: null,
+      errors: [
+        {
+          field: "server",
+          message: "lỗi gửi email ",
+        },
+      ],
+    });
   }
-  return res
-    .status(200)
-    .json({ success: true, message: "please check your mail!" });
+  return res.status(200).json({
+    statusCode: 200,
+    errors: null,
+    data: { message: "check mail của bạn" },
+  });
 };
 
 //CHANGE-PASSWORD
@@ -99,9 +197,13 @@ const changePassword = async (req, res) => {
     const hashPassword = await argon2.hash(password);
     await User.findByIdAndUpdate(payload, { password: hashPassword });
     await redis.del(FORGOT_PASSWORD_PREFIX + token);
-    res.status(200).json({ success: true, message: "password updated" });
+    res
+      .status(200)
+      .json({ statusCode: 200, data: { message: "password updated" } });
   } else {
-    return res.json({ success: false, message: "wrong something" });
+    return res
+      .status(500)
+      .json({ statusCode: 500, data: { message: "wrong something" } });
   }
 };
 module.exports = { register, login, forgotPassword, changePassword };
