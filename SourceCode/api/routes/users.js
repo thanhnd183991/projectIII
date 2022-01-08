@@ -5,6 +5,7 @@ const {
   findUser,
   allUsers,
   getUserStats,
+  searchUsers,
 } = require("../controllers/users.js");
 const { isAuth, isAdmin } = require("../middlewares/verifyIdentity");
 
@@ -18,6 +19,9 @@ router.get("/find/:id", isAuth, findUser);
 
 //GET ALL
 router.get("/", isAuth, isAdmin, allUsers);
+
+//SEARCH
+router.get("/search", isAuth, isAdmin, searchUsers);
 
 //GET USER STATS
 router.get("/stats", isAuth, isAdmin, getUserStats);

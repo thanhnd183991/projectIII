@@ -2,60 +2,97 @@ import { DeleteOutline } from "@mui/icons-material";
 import ModeEditIcon from "@mui/icons-material/ModeEdit";
 import { Avatar, Box } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
-import React, { useState } from "react";
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { userRows } from "../dummyData";
-
+import { deleteUser, getUsers } from "../api/getUsersAPI";
+import Skeleton from "./MySkeleton";
+import moment from "moment";
 export default function UserTable() {
-  const [data, setData] = useState(userRows);
+  // const [page, setPage] = useState(1);
+  const dispatch = useDispatch();
+  const { users, pending, loaded } = useSelector((state) => state.users);
+
+  useEffect(() => {
+    if (loaded === null) dispatch(getUsers(0));
+  }, [dispatch, loaded]);
 
   const handleDelete = (id) => {
-    setData(data.filter((item) => item.id !== id));
+    dispatch(deleteUser(id));
   };
+
+  // const onFilterChange = React.useCallback((filterModel) => {
+  //   console.log(filterModel.items[0]);
+  //   // async func
+  //   const { columnField, operatorValue } = filterModel.items[0];
+  //   // dispatch(searchUsers(columnField, operatorValue));
+  // }, []);
 
   const columns = [
     {
-      field: "avatar",
+      field: "username",
       headerName: "Họ và tên",
-      width: 280,
+      width: 250,
       renderCell: (params) => {
         return (
           <>
-            <Avatar src={params.row.avatar} />
+            <Avatar
+              src={params.row.avatar}
+              sx={{ width: "32px", height: "32px", mr: "5px" }}
+            />
             {params.row.username}
           </>
         );
       },
     },
-    { field: "email", headerName: "Email", width: 300 },
-    { field: "createdAt", headerName: "Ngày tạo", width: 180 },
+    { field: "email", headerName: "Email", width: 250 },
+    {
+      field: "createdAt",
+      headerName: "Ngày tạo",
+      width: 150,
+
+      renderCell: (params) => {
+        // const formatDate = moment(params.row.createdAt).format("X");
+        // moment.locale("vi");
+        // const m = moment(formatDate);
+        // const displayDate = m.fromNow();
+        return (
+          <div style={{ marginLeft: "5px" }}>
+            {moment(params.row.createdAt).fromNow()}
+          </div>
+        );
+      },
+    },
     {
       field: "updatedAt",
       headerName: "Ngày cập nhật",
-      width: 180,
+      width: 150,
+
+      renderCell: (params) => {
+        // const formatDate = moment(params.row.createdAt).format("X");
+        // moment.locale("vi");
+        // const m = moment(formatDate);
+        // const displayDate = m.fromNow();
+        return (
+          <div style={{ marginLeft: "5px" }}>
+            {moment(params.row.createdAt).fromNow()}
+          </div>
+        );
+      },
+    },
+    {
+      field: "isAdmin",
+      headerName: "Is admin?",
+      width: 150,
+      type: "boolean",
     },
     {
       field: "action",
       headerName: "Action",
-      width: 130,
+      width: 100,
+      filterable: false,
       sortable: false,
       renderCell: (params) => {
-        // const onClick = (e) => {
-        //   e.stopPropagation(); // don't select this row after clicking
-
-        //   const api = params.api;
-        //   const thisRow = {};
-        //   console.log(api);
-        //   api
-        //     .getAllColumns()
-        //     .filter((c) => c.field !== "__check__" && !!c)
-        //     .forEach(
-        //       (c) => (thisRow[c.field] = params.getValue(params.id, c.field))
-        //     );
-
-        //   return alert(JSON.stringify(thisRow, null, 4));
-        // };
-
         return (
           <Box sx={{ display: "flex" }}>
             <Link to={"/user/" + params.row.id}>
@@ -80,7 +117,18 @@ export default function UserTable() {
 
   return (
     <div style={{ height: "71vh", width: "100%" }}>
-      <DataGrid rows={data} columns={columns} pageSize={6} />
+      {pending && loaded === null ? (
+        <Skeleton width="100%" height="100%" />
+      ) : (
+        <DataGrid
+          rows={users}
+          columns={columns}
+          pageSize={6}
+          // filterMode="server"
+          // onFilterModelChange={onFilterChange}
+          loading={pending}
+        />
+      )}
     </div>
   );
 }

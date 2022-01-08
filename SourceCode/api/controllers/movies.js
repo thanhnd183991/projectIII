@@ -8,13 +8,11 @@ const {
   convertIdArray,
   convertId,
 } = require("../utils/convertModel");
+const msToHMS = require("../utils/convertTime");
+const { getVideoDurationInSeconds } = require("get-video-duration");
+const allGenres = require("../utils/getAllGenres");
 
-// json response
-// statusCode
-// data
-// errors: []
-
-//CREAT
+//CREATE
 const createMovie = async (req, res) => {
   upload(req, res, async (err) => {
     if (err) {
@@ -47,28 +45,53 @@ const createMovie = async (req, res) => {
         desc: req.body.desc,
         genre: req.body.genre,
         year: req.body.year,
-        limit: req.body.limit,
         isSeries: req.body.isSeries,
       });
 
-      movieFiles.forEach((file) => {
+      let checkVideo = false;
+      movieFiles.forEach(async (file) => {
         // console.log("now", file);
         newMovie[
           file.fieldname
         ] = `${process.env.APP_BASE_URL}/api/files?${file.fieldname}=${file.filename}`;
+        if (file.fieldname === "video") {
+          checkVideo = true;
+          await getVideoDurationInSeconds(`${__dirname}/../${file.path}`)
+            .then((duration) => {
+              console.log("duration ", duration);
+              newMovie.duration = msToHMS(duration * 1000);
+              return newMovie.save();
+            })
+            .then((saveMovie) =>
+              res.status(201).json({
+                data: convertId(saveMovie),
+                statusCode: 201,
+                errors: null,
+              })
+            )
+            .catch((err) =>
+              res.json({
+                statusCode: 500,
+                errors: [{ field: "server", message: err.message }],
+              })
+            );
+        }
       });
 
-      try {
-        const saveMovie = await newMovie.save();
-        console.log(saveMovie);
-        res
-          .status(201)
-          .json({ data: convertId(saveMovie), statusCode: 201, errors: null });
-      } catch (err) {
-        res.json({
-          statusCode: 500,
-          errors: [{ field: "server", message: err.message }],
-        });
+      if (!checkVideo) {
+        try {
+          newMovie = await newMovie.save();
+          return res.status(201).json({
+            data: convertId(newMovie),
+            statusCode: 201,
+            errors: null,
+          });
+        } catch (err) {
+          return res.json({
+            statusCode: 500,
+            errors: [{ field: "server", message: err.message }],
+          });
+        }
       }
     }
   });
@@ -77,30 +100,101 @@ const createMovie = async (req, res) => {
 //UPDATE
 
 const updateMovie = async (req, res) => {
-  try {
-    const updatedMovie = await Movie.findByIdAndUpdate(
-      req.params.id,
-      {
-        $set: req.body,
-      },
-      { new: true }
-    );
-    res
-      .status(200)
-      .json({ statusCode: 200, data: convertId(updatedMovie), errors: null });
-  } catch (err) {
-    return res.json({
-      statusCode: 500,
-      errors: [{ field: "server", message: err.message }],
-    });
-  }
+  upload(req, res, async (err) => {
+    if (err) {
+      return res.json({ errors: [{ field: "server", message: err.message }] });
+    } else {
+      let movie = await Movie.findById(req.params.id);
+      const checkMovie = await Movie.findOne({ title: req.body.title });
+      let movieFiles = Object.keys(req.files).map((key) => req.files[key]);
+      if (checkMovie && checkMovie._id === movie._id) {
+        let removeFiles = [];
+        movieFiles.forEach((file) => {
+          removeFiles.push(deleteFile(`${__dirname}/../${file.path}`));
+        });
+        Promise.all(removeFiles)
+          .then(() => console.log("remove files success"))
+          .catch((err) => console.log(err.message));
+        return res.json({
+          errors: [{ field: "server", message: "trùng tên" }],
+        });
+      }
+      if (movie.length != 0) {
+        let removeFiles = [];
+        movieFiles.forEach((file) => {
+          if (file.fieldname) {
+            const myURL = movie[file.fieldname];
+            if (myURL) {
+              let index = myURL.indexOf("=");
+              const myPath = myURL.substring(index + 1);
+              // console.log("mypath ", myPath);
+              removeFiles.push(deleteFile(`${__dirname}/../uploads/${myPath}`));
+            }
+          }
+        });
+        Promise.all(removeFiles)
+          .then(() => console.log("remove files success"))
+          .catch((err) => console.log(err.message));
+      }
+
+      movie.title = req.body.title || movie.title;
+      movie.desc = req.body.desc || movie.desc;
+      movie.genre = req.body.genre || movie.genre;
+      movie.year = req.body.year || movie.year;
+      movie.isSeries = req.body.isSeries || movie.isSeries;
+      movie.idSeries = req.body.idSeries || movie.idSeries;
+
+      let checkVideo = false;
+      movieFiles.forEach(async (file) => {
+        movie[
+          file.fieldname
+        ] = `${process.env.APP_BASE_URL}/api/files?${file.fieldname}=${file.filename}`;
+        if (file.fieldname === "video") {
+          checkVideo = true;
+          await getVideoDurationInSeconds(`${__dirname}/../${file.path}`)
+            .then((duration) => {
+              movie.duration = msToHMS(duration * 1000);
+              // console.log(movie);
+              return movie.save();
+            })
+            .then((updateMovie) =>
+              res.status(200).json({
+                data: convertId(updateMovie),
+                statusCode: 200,
+                errors: null,
+              })
+            )
+            .catch((err) =>
+              res.json({
+                statusCode: 500,
+                errors: [{ field: "server", message: err.message }],
+              })
+            );
+        }
+      });
+      if (!checkVideo) {
+        movie.save();
+        return res.status(200).json({
+          statusCode: 200,
+          data: convertId(movie),
+          errors: null,
+        });
+      }
+    }
+  });
 };
 
 //DELETE
 
 const deleteMovie = async (req, res) => {
   try {
-    const rs = await Movie.findByIdAndDelete(req.params.id);
+    const rs = await Movie.findById(req.params.id);
+    if (rs.isSeries) {
+      const series = await Series.findById(rs.idSeries);
+      series.content = series?.content.filter((el) => el != rs._id);
+      await series.save();
+      await rs.delete();
+    }
     if (!rs) {
       return res.json({
         statusCode: 404,
@@ -119,6 +213,19 @@ const deleteMovie = async (req, res) => {
   }
 };
 
+// get list movies by array id
+const getMoviesByArrayId = async (req, res) => {
+  try {
+    let movies = await Movie.find({ _id: { $in: req.body.content } });
+    movies = Object.values(movies);
+    res.status(200).json({ data: convertIdArray(movies), statusCode: 200 });
+  } catch (err) {
+    return res.json({
+      statusCode: 500,
+      errors: [{ field: "server", message: err.message }],
+    });
+  }
+};
 //GET
 
 const getMovie = async (req, res) => {
@@ -152,8 +259,32 @@ const getRandomMovie = async (req, res) => {
         { $sample: { size: 10 } },
       ]);
     }
-    console.log(typeof movies);
     res.status(200).json({ statusCode: 200, data: convertIdArray(movies) });
+  } catch (err) {
+    return res.json({
+      statusCode: 500,
+      errors: [{ field: "server", message: err.message }],
+    });
+  }
+};
+
+//GET ALL GENRES
+
+const getAllGenres = async (req, res) => {
+  try {
+    const genres = await Movie.find().select({ genre: 1 });
+
+    const data = allGenres(genres).sort(function (a, b) {
+      return a.localeCompare(b);
+    });
+    if (data[0] === "(no genres listed)") {
+      data.shift();
+      data.push("(no genres listed)");
+    }
+    // console.log(data);
+    res.status(200).json({
+      data,
+    });
   } catch (err) {
     return res.json({
       statusCode: 500,
@@ -181,6 +312,8 @@ const getAllMovies = async (req, res) => {
         .sort({ views: -1 })
         .limit(LIMIT)
         .skip(startIndex);
+    } else {
+      movies = await Movie.find({ isSeries: false }).sort({ updatedAt: -1 });
     }
     res.status(200).json({
       data: {
@@ -411,5 +544,7 @@ module.exports = {
   searchMovie,
   viewMovie,
   likeMovie,
+  getAllGenres,
+  getMoviesByArrayId,
   commentMovie,
 };

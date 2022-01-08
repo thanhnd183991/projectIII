@@ -4,13 +4,13 @@ import { Box } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-
-export default function SeriesTable({ series }) {
-  const [data, setData] = useState(series || []);
-  const handleDelete = (id) => {
-    setData(data.filter((item) => item.id !== id));
-  };
-
+import Skeleton from "./MySkeleton";
+import { useDispatch } from "react-redux";
+import { deleteSeries } from "../api/getSeriesAPI";
+import { updateMoviesByDeleteSeries } from "../api/getMoviesAPI";
+import moment from "moment";
+export default function SeriesTable({ data, pending, loaded }) {
+  const dispatch = useDispatch();
   const columns = [
     {
       field: "title",
@@ -45,11 +45,33 @@ export default function SeriesTable({ series }) {
       field: "createdAt",
       headerName: "Ngày tạo",
       width: 150,
+      renderCell: (params) => {
+        // const formatDate = moment(params.row.createdAt).format("X");
+        // moment.locale("vi");
+        // const m = moment(formatDate);
+        // const displayDate = m.fromNow();
+        return (
+          <div style={{ marginLeft: "5px" }}>
+            {moment(params.row.createdAt).fromNow()}
+          </div>
+        );
+      },
     },
     {
       field: "updatedAt",
       headerName: "Ngày cập nhật",
       width: 150,
+      renderCell: (params) => {
+        // const formatDate = moment(params.row.createdAt).format("X");
+        // moment.locale("vi");
+        // const m = moment(formatDate);
+        // const displayDate = m.fromNow();
+        return (
+          <div style={{ marginLeft: "5px" }}>
+            {moment(params.row.updatedAt).fromNow()}
+          </div>
+        );
+      },
     },
     {
       field: "action",
@@ -57,22 +79,6 @@ export default function SeriesTable({ series }) {
       width: 130,
       sortable: false,
       renderCell: (params) => {
-        // const onClick = (e) => {
-        //   e.stopPropagation(); // don't select this row after clicking
-
-        //   const api = params.api;
-        //   const thisRow = {};
-        //   console.log(api);
-        //   api
-        //     .getAllColumns()
-        //     .filter((c) => c.field !== "__check__" && !!c)
-        //     .forEach(
-        //       (c) => (thisRow[c.field] = params.getValue(params.id, c.field))
-        //     );
-
-        //   return alert(JSON.stringify(thisRow, null, 4));
-        // };
-
         return (
           <Box sx={{ display: "flex" }}>
             <Link to={"/series/" + params.row.id}>
@@ -86,7 +92,10 @@ export default function SeriesTable({ series }) {
             >
               <DeleteOutline
                 sx={{ mb: "-5px" }}
-                onClick={() => handleDelete(params.row.id)}
+                onClick={() => {
+                  dispatch(deleteSeries(params.row.id));
+                  dispatch(updateMoviesByDeleteSeries(params.row.content));
+                }}
               />
             </Box>
           </Box>
@@ -97,7 +106,11 @@ export default function SeriesTable({ series }) {
 
   return (
     <div style={{ height: "71vh", width: "100%" }}>
-      <DataGrid rows={data} columns={columns} pageSize={6} />
+      {pending && loaded === null ? (
+        <Skeleton width="100%" height="100%" />
+      ) : (
+        <DataGrid rows={data} columns={columns} pageSize={6} />
+      )}
     </div>
   );
 }

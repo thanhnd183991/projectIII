@@ -14,7 +14,7 @@ let storage = multer.diskStorage({
     const uid = v4();
     const tailFile = file.originalname.match(/\.[0-9a-z]+$/i)[0];
     let filename = `${Date.now()}-${file.fieldname}-${uid}${tailFile}`;
-    // console.log(filename);
+    // console.log("disk ", filename);
     cb(null, filename);
   },
 });

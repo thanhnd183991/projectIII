@@ -2,26 +2,25 @@ import { DeleteOutline } from "@mui/icons-material";
 import ModeEditIcon from "@mui/icons-material/ModeEdit";
 import { Box } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
-import React, { useState } from "react";
+import React from "react";
+import { useDispatch } from "react-redux";
+import Skeleton from "./MySkeleton";
 import { Link } from "react-router-dom";
-
-export default function ItemTable({ movies }) {
-  const [data, setData] = useState(movies || []);
-  const handleDelete = (id) => {
-    setData(data.filter((item) => item.id !== id));
-  };
+import { deleteMovie } from "../api/getMoviesAPI";
+import moment from "moment";
+export default function MovieTable({ data, loaded, pending }) {
+  const dispatch = useDispatch();
   const columns = [
     {
       field: "title",
       headerName: "Tên phim",
-      width: 280,
+      width: 150,
       renderCell: (params) => {
         return <div>{params.row.title}</div>;
       },
     },
-    { field: "desc", headerName: "Miêu tả", width: 150 },
     { field: "year", headerName: "Năm sản xuất", width: 150 },
-    { field: "duration", headerName: "Thời lượng", width: 100 },
+    { field: "duration", headerName: "Thời lượng", width: 180 },
     {
       field: "genre",
       headerName: "Thể loại",
@@ -53,11 +52,35 @@ export default function ItemTable({ movies }) {
       field: "createdAt",
       headerName: "Ngày tạo",
       width: 150,
+
+      renderCell: (params) => {
+        // const formatDate = moment(params.row.createdAt).format("X");
+        // moment.locale("vi");
+        // const m = moment(formatDate);
+        // const displayDate = m.fromNow();
+        return (
+          <div style={{ marginLeft: "5px" }}>
+            {moment(params.row.createdAt).fromNow()}
+          </div>
+        );
+      },
     },
     {
       field: "updatedAt",
       headerName: "Ngày cập nhật",
       width: 150,
+
+      renderCell: (params) => {
+        // const formatDate = moment(params.row.createdAt).format("X");
+        // moment.locale("vi");
+        // const m = moment(formatDate);
+        // const displayDate = m.fromNow();
+        return (
+          <div style={{ marginLeft: "5px" }}>
+            {moment(params.row.createdAt).fromNow()}
+          </div>
+        );
+      },
     },
     {
       field: "action",
@@ -65,22 +88,6 @@ export default function ItemTable({ movies }) {
       width: 130,
       sortable: false,
       renderCell: (params) => {
-        // const onClick = (e) => {
-        //   e.stopPropagation(); // don't select this row after clicking
-
-        //   const api = params.api;
-        //   const thisRow = {};
-        //   console.log(api);
-        //   api
-        //     .getAllColumns()
-        //     .filter((c) => c.field !== "__check__" && !!c)
-        //     .forEach(
-        //       (c) => (thisRow[c.field] = params.getValue(params.id, c.field))
-        //     );
-
-        //   return alert(JSON.stringify(thisRow, null, 4));
-        // };
-
         return (
           <Box sx={{ display: "flex" }}>
             <Link to={"/movie/" + params.row.id}>
@@ -94,7 +101,7 @@ export default function ItemTable({ movies }) {
             >
               <DeleteOutline
                 sx={{ mb: "-5px" }}
-                onClick={() => handleDelete(params.row.id)}
+                onClick={() => dispatch(deleteMovie(params.row.id))}
               />
             </Box>
           </Box>
@@ -105,7 +112,11 @@ export default function ItemTable({ movies }) {
 
   return (
     <div style={{ height: "71vh", width: "100%" }}>
-      <DataGrid rows={data} columns={columns} pageSize={6} />
+      {pending && loaded === null ? (
+        <Skeleton width="100%" height="100%" />
+      ) : (
+        <DataGrid rows={data} columns={columns} pageSize={6} />
+      )}
     </div>
   );
 }

@@ -111,15 +111,79 @@ const findUser = async (req, res) => {
 
 //GET ALL
 const allUsers = async (req, res) => {
-  const query = req.query.new;
+  // const { page, limit } = req.query;
+  // const LIMIT = limit || 6;
+  // const startIndex = (Number(page || 1) - 1) * LIMIT; // get the starting index of every page
+  // let total = 0;
   if (req.user.isAdmin) {
     try {
-      const users = query
-        ? await User.find().select({ password: 0 }).sort({ _id: -1 }).limit(5)
-        : await User.find().select({ password: 0 });
-      return res
-        .status(200)
-        .json({ statusCode: 200, data: convertIdArray(users) });
+      // total = await User.countDocuments({});
+      const users = await User.find().select({ password: 0 }).sort({ _id: -1 });
+      // .limit(LIMIT)
+      // .skip(startIndex);
+      return res.status(200).json({
+        data: {
+          data: convertIdArray(users),
+          // currentPage: Number(page || 1),
+          // numberOfPages: Math.ceil(total / LIMIT),
+          // total,
+        },
+      });
+    } catch (err) {
+      res.json({
+        statusCode: 500,
+        errors: [{ field: "server", message: err.message }],
+      });
+    }
+  } else {
+    return res.json({
+      statusCode: 403,
+      errros: [{ field: "server", message: "you are not admin" }],
+    });
+  }
+};
+
+// SEARCH USER
+const searchUsers = async (req, res) => {
+  const { columnField, operatorValue, value, page, limit } = req.query;
+  if (req.user.isAdmin) {
+    try {
+      let myFilter = "";
+      const PAGE = page || 1;
+      const LIMIT = limit || 6;
+      const startIndex = (Number(PAGE) - 1) * LIMIT; // get the starting index of every page
+      let total = 0;
+      if (operatorValue === "contains") {
+        myFilter = { $regex: new RegExp(".*" + value + ".*", "i") };
+      } else if (operatorValue === "equals") {
+        myFilter = { $eq: value };
+      } else if (operatorValue === "startsWith") {
+        myFilter = { $regex: new RegExp("^" + value + ".*", "i") };
+      } else if (operatorValue === "endsWith") {
+        myFilter = { $regex: new RegExp(".*" + value + "$", "i") };
+      } else if (operatorValue === "isEmpty") {
+        myFilter = { $eq: null };
+      } else if (operatorValue === "isNotEmpty") {
+        myFilter = { $ne: null };
+      }
+      let obj = {};
+      Object.assign(obj, { [columnField]: myFilter });
+      console.log(obj);
+      total = await User.find(obj).countDocuments();
+      const users = await User.find(obj)
+        .select({
+          username: 1,
+        })
+        .limit(LIMIT)
+        .skip(startIndex);
+      return res.status(200).json({
+        data: {
+          total,
+          data: convertIdArray(users),
+          currentPage: PAGE,
+          numberOfPages: Math.ceil(total / LIMIT),
+        },
+      });
     } catch (err) {
       res.json({
         statusCode: 500,
@@ -162,4 +226,11 @@ const getUserStats = async (req, res) => {
   }
 };
 
-module.exports = { updateUser, deleteUser, findUser, allUsers, getUserStats };
+module.exports = {
+  updateUser,
+  searchUsers,
+  deleteUser,
+  findUser,
+  allUsers,
+  getUserStats,
+};

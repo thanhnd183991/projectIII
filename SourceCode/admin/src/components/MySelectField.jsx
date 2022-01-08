@@ -8,8 +8,8 @@ import Select from "@mui/material/Select";
 import Checkbox from "@mui/material/Checkbox";
 import Box from "@mui/material/Box";
 import Chip from "@mui/material/Chip";
-import { allGenres as names } from "../utils/getAllGenres";
-
+import { getAllGenres } from "../utils/getInfoMovies";
+import { useSelector } from "react-redux";
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
 const MenuProps = {
@@ -26,16 +26,30 @@ export default function MySelectField({
   valueField,
   label,
   setFieldValue,
+  modal,
 }) {
+  const { movies } = useSelector((state) => state.movies);
+  let names = [];
+  if (name === "genre") {
+    names = getAllGenres();
+  } else if (name === "content") {
+    movies?.forEach((movie) => {
+      names.push(`${movie.id}|${movie.title}`);
+    });
+  }
   const handleChange = (event) => {
     const {
       target: { value },
     } = event;
-    setFieldValue(
-      name,
-      // On autofill we get a the stringified value.
-      typeof value === "string" ? value.split(",") : value
-    );
+    if (!modal) {
+      setFieldValue(
+        name,
+        // On autofill we get a the stringified value.
+        typeof value === "string" ? value.split(",") : value
+      );
+    } else {
+      setFieldValue(typeof value === "string" ? value.split(",") : value);
+    }
   };
 
   return (
@@ -48,22 +62,35 @@ export default function MySelectField({
           multiple
           value={valueField}
           onChange={handleChange}
+          required
           input={<OutlinedInput label={label} />}
           renderValue={(selected) => (
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-              {selected.map((value) => (
-                <Chip key={value} label={value} />
-              ))}
+              {name === "genre"
+                ? selected.map((value) => <Chip key={value} label={value} />)
+                : selected.map((value) => (
+                    <Chip
+                      key={value?.split("|")[0]}
+                      label={value?.split("|")[1]}
+                    />
+                  ))}
             </Box>
           )}
           MenuProps={MenuProps}
         >
-          {names.map((el) => (
-            <MenuItem key={el} value={el}>
-              <Checkbox checked={valueField.indexOf(el) > -1} />
-              <ListItemText primary={el} />
-            </MenuItem>
-          ))}
+          {name === "genre"
+            ? names.map((el) => (
+                <MenuItem key={el} value={el}>
+                  <Checkbox checked={valueField.indexOf(el) > -1} />
+                  <ListItemText primary={el} />
+                </MenuItem>
+              ))
+            : names.map((el) => (
+                <MenuItem key={el?.split("|")[0]} value={el}>
+                  <Checkbox checked={valueField.indexOf(el) > -1} />
+                  <ListItemText primary={el?.split("|")[1]} />
+                </MenuItem>
+              ))}
         </Select>
       </FormControl>
     </div>

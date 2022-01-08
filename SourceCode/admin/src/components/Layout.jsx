@@ -1,4 +1,5 @@
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import AccountCircle from "@mui/icons-material/AccountCircle";
 import MenuIcon from "@mui/icons-material/Menu";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import MuiAppBar from "@mui/material/AppBar";
@@ -13,9 +14,12 @@ import List from "@mui/material/List";
 import { createTheme, styled, ThemeProvider } from "@mui/material/styles";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
+import Avatar from "@mui/material/Avatar";
 import * as React from "react";
 import { mainListItems } from "./ListItems";
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 const drawerWidth = 240;
 
@@ -66,11 +70,14 @@ const Drawer = styled(MuiDrawer, {
 const mdTheme = createTheme();
 
 const Layout = ({ children }) => {
+  const { userInfo } = useSelector((state) => state.auth);
+  const navigate = useNavigate();
   const [open, setOpen] = React.useState(true);
   const toggleDrawer = () => {
     setOpen(!open);
   };
 
+  const menuId = "primary-search-account-menu";
   return (
     <ThemeProvider theme={mdTheme}>
       <Box sx={{ display: "flex" }}>
@@ -108,6 +115,23 @@ const Layout = ({ children }) => {
               <Badge badgeContent={4} color="secondary">
                 <NotificationsIcon />
               </Badge>
+            </IconButton>
+            <IconButton
+              size="large"
+              edge="end"
+              aria-label="account of current user"
+              aria-controls={menuId}
+              aria-haspopup="true"
+              onClick={() => {
+                navigate("/account");
+              }}
+              color="inherit"
+            >
+              {userInfo.avatar ? (
+                <Avatar src={userInfo.avatar} />
+              ) : (
+                <AccountCircle />
+              )}
             </IconButton>
           </Toolbar>
         </AppBar>

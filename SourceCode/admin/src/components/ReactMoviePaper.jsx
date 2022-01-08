@@ -2,7 +2,7 @@ import { Avatar, Box, Typography } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import Paper from "@mui/material/Paper";
 import React from "react";
-import { userRows } from "../dummyData";
+import Skeleton from "./MySkeleton";
 
 const ReactMoviePaper = ({ movie }) => {
   return (
@@ -19,31 +19,35 @@ const ReactMoviePaper = ({ movie }) => {
           <Typography variant="h5" gutterBottom component="div">
             Đã thích
           </Typography>
-          {userRows.map((user) => (
-            <Box
-              sx={{
-                display: "flex",
-                gap: "5px",
-                backgroundColor: "whitesmoke",
-                borderRadius: "5px",
-              }}
-              key={user.id}
-            >
-              <Avatar
-                sx={{ width: "32px", height: "32px" }}
-                src={user.avatar}
-              ></Avatar>
+          {movie ? (
+            movie?.likes.map((user) => (
               <Box
                 sx={{
                   display: "flex",
-                  alignItems: "center",
-                  alignSelf: "center",
+                  gap: "5px",
+                  backgroundColor: "whitesmoke",
+                  borderRadius: "5px",
                 }}
+                key={user.id}
               >
-                {user.username}
+                <Avatar
+                  sx={{ width: "32px", height: "32px" }}
+                  src={user.avatar}
+                ></Avatar>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    alignSelf: "center",
+                  }}
+                >
+                  {user.username}
+                </Box>
               </Box>
-            </Box>
-          ))}
+            ))
+          ) : (
+            <Skeleton width="100%" height="300px" />
+          )}
         </Paper>
       </Grid>
       <Grid item xs={12} md={8}>
@@ -58,32 +62,36 @@ const ReactMoviePaper = ({ movie }) => {
           <Typography variant="h5" gutterBottom component="div">
             Bình luận
           </Typography>
-          {userRows.map((user) => (
-            <Box
-              sx={{
-                display: "flex",
-                gap: "5px",
-                borderRadius: "5px",
-                background: "whitesmoke",
-              }}
-              key={user.id}
-            >
-              <Avatar
-                sx={{ width: "32px", height: "32px" }}
-                src={user.avatar}
-              ></Avatar>
+          {movie ? (
+            movie?.comments.map((user) => (
               <Box
                 sx={{
                   display: "flex",
-                  flexDirection: "column",
+                  gap: "5px",
+                  borderRadius: "5px",
+                  background: "whitesmoke",
                 }}
                 key={user.id}
               >
-                <Box sx={{ fontWeight: "bold" }}>{user.username}</Box>
-                <Box>something comment</Box>
+                <Avatar
+                  sx={{ width: "32px", height: "32px" }}
+                  src={user.avatar}
+                ></Avatar>
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                  }}
+                  key={user.id}
+                >
+                  <Box sx={{ fontWeight: "bold" }}>{user.username}</Box>
+                  <Box>something comment</Box>
+                </Box>
               </Box>
-            </Box>
-          ))}
+            ))
+          ) : (
+            <Skeleton width="100%" height="300px" />
+          )}
         </Paper>
       </Grid>
     </Box>

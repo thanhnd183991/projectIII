@@ -10,7 +10,8 @@ const {
   searchMovie,
   viewMovie,
   likeMovie,
-  commentMovie,
+  commentMovie,getAllGenres,
+  getMoviesByArrayId,
 } = require("../controllers/movies.js");
 const { upload } = require("../config/diskStorage");
 
@@ -25,6 +26,7 @@ router.put("/:id", isAuth, isAdmin, updateMovie);
 //DELETE
 
 router.delete("/:id", isAuth, isAdmin, deleteMovie);
+router.post("/getMoviesByArrayId", getMoviesByArrayId);
 
 //GET
 
@@ -41,6 +43,10 @@ router.get("/search", searchMovie);
 //GET ALL
 
 router.get("/", getAllMovies);
+
+//GET ALL GENRES
+
+router.get("/genres", getAllGenres);
 
 //VIEW
 
