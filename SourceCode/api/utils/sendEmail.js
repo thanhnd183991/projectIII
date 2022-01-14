@@ -28,7 +28,7 @@ const sendEmail = async (toEmail, userID) => {
     const rs = await axios.request(options);
     // console.log("send mail", rs);
     if (redis) {
-      redis.set(
+     await redis.set(
         FORGOT_PASSWORD_PREFIX + token,
         userID,
         "ex",

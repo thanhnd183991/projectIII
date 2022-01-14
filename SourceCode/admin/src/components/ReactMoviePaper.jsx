@@ -3,6 +3,7 @@ import Grid from "@mui/material/Grid";
 import Paper from "@mui/material/Paper";
 import React from "react";
 import Skeleton from "./MySkeleton";
+import ReactEmoji from "react-emoji";
 
 const ReactMoviePaper = ({ movie }) => {
   return (
@@ -90,7 +91,17 @@ const ReactMoviePaper = ({ movie }) => {
                     <Box sx={{ fontWeight: "bold" }}>
                       {userCmt.createdBy.username}
                     </Box>
-                    <Box>{userCmt.data}</Box>
+                    <Box
+                      sx={{
+                        "& img": {
+                          width: "15px",
+                          height: "15px",
+                          marginBottom: "-2px",
+                        },
+                      }}
+                    >
+                      {ReactEmoji.emojify(userCmt.data)}
+                    </Box>
                   </Box>
                 </Box>
               ))}

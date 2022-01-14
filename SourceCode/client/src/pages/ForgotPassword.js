@@ -65,7 +65,6 @@ const ForgotPassword = () => {
                     email: data.text,
                   });
                 }
-                setSubmitting(false);
                 if (!token) {
                   if (response.data.data) {
                     setStatus({ success: "vui lòng kiểm tra email của bạn" });
@@ -79,6 +78,7 @@ const ForgotPassword = () => {
                     setStatus({ error: "lỗi không cập nhật được mật khẩu" });
                   }
                 }
+                setSubmitting(false);
               }}
             >
               {({ values, status, errors, isSubmitting }) => (
