@@ -10,6 +10,7 @@ const SlideContainer = styled("div")(({ theme }) => ({
   overflow: "hidden",
   position: "relative",
   userSelect: "none",
+  color: "white",
 }));
 
 const SlideImage = styled("img")(({ theme }) => ({
@@ -26,6 +27,9 @@ const SlideInner = styled("div")(({ theme }) => ({
   width: "50%",
   bottom: "80px",
   marginLeft: "20px",
+  backgroundColor: "rgba(0, 0, 0, 0.2)",
+  padding: "10px",
+  borderRadius: "20px",
 }));
 
 const SlideTitle = styled("div")(({ theme, x }) => ({
@@ -38,6 +42,7 @@ const SlideTitle = styled("div")(({ theme, x }) => ({
 const SlideDesc = styled("div")(({ theme, x }) => ({
   fontSize: 14,
   fontWeight: "normal",
+  wordBreak: "break-word",
 }));
 const SlideGroupButton = styled("div")(({ theme, x }) => ({
   display: "flex",

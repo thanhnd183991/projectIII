@@ -80,12 +80,12 @@ export default function UserTable() {
         );
       },
     },
-    {
-      field: "isAdmin",
-      headerName: "Is admin?",
-      width: 150,
-      type: "boolean",
-    },
+    // {
+    //   field: "isAdmin",
+    //   headerName: "Is admin?",
+    //   width: 150,
+    //   type: "boolean",
+    // },
     {
       field: "action",
       headerName: "Action",

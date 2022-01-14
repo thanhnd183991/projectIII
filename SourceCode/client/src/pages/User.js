@@ -1,19 +1,35 @@
 import { Box, Button } from "@mui/material";
 import { Form, Formik } from "formik";
-import React from "react";
+import React, { useEffect } from "react";
 import Layout from "../components/Layout";
 import MyFileField from "../components/MyFileField";
 import MyTextField from "../components/MyTextField";
 import validateUpdateUser from "../utils/validateUpdateUser";
 import { useDispatch, useSelector } from "react-redux";
-import { updateAPI } from "../api/authAPI";
+import { updateUser } from "../functions/userFunctions";
 import { toErrorMap } from "../utils/toErrorMap";
 import { update, logout } from "../redux/authSlice";
+import { useNavigate } from "react-router-dom";
+import MyAlert from "../components/MyAlert";
+import { isValidToken } from "../utils/jwt";
+import { DELETE_ALL_NOTIFICATION } from "../redux/notificationSlice";
 
 const User = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { userInfo } = useSelector((state) => state.auth);
-  // console.log(userInfo);
+  useEffect(() => {
+    if (
+      !(
+        localStorage.getItem("accessToken") &&
+        isValidToken(localStorage.getItem("accessToken")).isValid
+      )
+    ) {
+      dispatch(DELETE_ALL_NOTIFICATION());
+      dispatch(logout());
+      navigate("/login");
+    }
+  }, [dispatch, navigate]);
   return (
     <Layout>
       <Box sx={{ minHeight: "91vh", maxWidth: "sm", mx: "auto" }}>
@@ -53,7 +69,7 @@ const User = () => {
                 console.log("update avatar");
                 formData.append("avatar", data.avatar);
               }
-              const response = await updateAPI(userInfo.id, formData);
+              const response = await updateUser(userInfo.id, formData);
               if (response.data.errors) {
                 setErrors(toErrorMap(response.data.errors));
               } else {
@@ -86,17 +102,7 @@ const User = () => {
                 />
               </Box>
               {status && status.success && (
-                <Box
-                  sx={{
-                    fontWeight: "10px",
-                    fontStyle: "italic",
-                    color: "whitesmoke",
-                    textAlign: "center",
-                    width: "100%",
-                  }}
-                >
-                  {status.success}
-                </Box>
+                <MyAlert message={status.success} attr="success" />
               )}
               <Box
                 sx={{
@@ -108,7 +114,11 @@ const User = () => {
                 <Button
                   variant="contained"
                   sx={{ mb: 1, display: "block" }}
-                  onClick={() => dispatch(logout())}
+                  onClick={() => {
+                    dispatch(DELETE_ALL_NOTIFICATION());
+                    dispatch(logout());
+                    navigate("/login");
+                  }}
                 >
                   Đăng xuất
                 </Button>

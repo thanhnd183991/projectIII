@@ -16,35 +16,37 @@ const ReactMoviePaper = ({ movie }) => {
             gap: "5px",
           }}
         >
-          <Typography variant="h5" gutterBottom component="div">
-            Đã thích
-          </Typography>
           {movie ? (
-            movie?.likes.map((user) => (
-              <Box
-                sx={{
-                  display: "flex",
-                  gap: "5px",
-                  backgroundColor: "whitesmoke",
-                  borderRadius: "5px",
-                }}
-                key={user.id}
-              >
-                <Avatar
-                  sx={{ width: "32px", height: "32px" }}
-                  src={user.avatar}
-                ></Avatar>
+            <>
+              <Typography variant="h5" gutterBottom component="div">
+                Đã thích<em>({movie?.likes?.length})</em>
+              </Typography>
+              {movie?.likes.map((user, i) => (
                 <Box
+                  key={user._id || i}
                   sx={{
                     display: "flex",
-                    alignItems: "center",
-                    alignSelf: "center",
+                    gap: "5px",
+                    backgroundColor: "whitesmoke",
+                    borderRadius: "5px",
                   }}
                 >
-                  {user.username}
+                  <Avatar
+                    sx={{ width: "32px", height: "32px" }}
+                    src={user.avatar}
+                  ></Avatar>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      alignSelf: "center",
+                    }}
+                  >
+                    {user.username}
+                  </Box>
                 </Box>
-              </Box>
-            ))
+              ))}
+            </>
           ) : (
             <Skeleton width="100%" height="300px" />
           )}
@@ -59,36 +61,40 @@ const ReactMoviePaper = ({ movie }) => {
             gap: "10px",
           }}
         >
-          <Typography variant="h5" gutterBottom component="div">
-            Bình luận
-          </Typography>
           {movie ? (
-            movie?.comments.map((user) => (
-              <Box
-                sx={{
-                  display: "flex",
-                  gap: "5px",
-                  borderRadius: "5px",
-                  background: "whitesmoke",
-                }}
-                key={user.id}
-              >
-                <Avatar
-                  sx={{ width: "32px", height: "32px" }}
-                  src={user.avatar}
-                ></Avatar>
+            <>
+              <Typography variant="h5" gutterBottom component="div">
+                Bình luận<em>({movie?.comments?.length})</em>
+              </Typography>
+              {movie?.comments.map((userCmt, i) => (
                 <Box
                   sx={{
                     display: "flex",
-                    flexDirection: "column",
+                    gap: "5px",
+                    borderRadius: "5px",
+                    background: "whitesmoke",
                   }}
-                  key={user.id}
+                  key={i}
                 >
-                  <Box sx={{ fontWeight: "bold" }}>{user.username}</Box>
-                  <Box>something comment</Box>
+                  <Avatar
+                    sx={{ width: "32px", height: "32px" }}
+                    src={userCmt.createdBy.avatar}
+                  ></Avatar>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                    }}
+                    key={i}
+                  >
+                    <Box sx={{ fontWeight: "bold" }}>
+                      {userCmt.createdBy.username}
+                    </Box>
+                    <Box>{userCmt.data}</Box>
+                  </Box>
                 </Box>
-              </Box>
-            ))
+              ))}
+            </>
           ) : (
             <Skeleton width="100%" height="300px" />
           )}

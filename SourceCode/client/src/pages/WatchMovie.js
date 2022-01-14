@@ -5,19 +5,41 @@ import Comments from "../components/Comments";
 import Layout from "../components/Layout";
 import VideoPlayer from "../components/VideoPlayer";
 import { useDispatch, useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
-import { getDetail } from "../api/getDetailAPI";
+import { useNavigate, useParams } from "react-router-dom";
+import { getDetail } from "../redux/detailSlice";
+import { DELETE_ALL_NOTIFICATION } from "../redux/notificationSlice";
+import { logout } from "../redux/authSlice";
+import axios from "../utils/axios";
+import { isValidToken, setSession } from "../utils/jwt";
 
 const WatchMovie = () => {
   const dispatch = useDispatch();
-  const { movie, asideMovies, pending } = useSelector((state) => state.detail);
+  const navigate = useNavigate();
+  const { movie, asideMovies, pending, error } = useSelector(
+    (state) => state.detail
+  );
   const { movieId } = useParams();
   useEffect(() => {
-    if (movie === {}) {
-      console.log("watch movie");
-      dispatch(getDetail(movieId));
-    }
-  }, [dispatch, movieId, movie]);
+    dispatch(getDetail(movieId));
+    const increaseView = async () => {
+      if (
+        localStorage.getItem("accessToken") &&
+        isValidToken(localStorage.getItem("accessToken")).isValid
+      ) {
+        setSession(localStorage.getItem("accessToken"));
+        await axios.get(`/movies/view/${movieId}`);
+      } else {
+        console.log("vao");
+        dispatch(DELETE_ALL_NOTIFICATION());
+        dispatch(logout());
+        navigate("/login");
+      }
+    };
+    increaseView();
+  }, [dispatch, navigate, movieId]);
+  if (error) {
+    return <pre>{JSON.stringify(error)}</pre>;
+  }
   return (
     <Layout noSlider>
       <Container component="main" sx={{ my: 2 }}>

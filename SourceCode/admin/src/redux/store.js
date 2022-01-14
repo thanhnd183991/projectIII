@@ -4,6 +4,7 @@ import usersReducer from "./usersSlice";
 import moviesReducer from "./moviesSlice";
 import seriesReducer from "./seriesSlice";
 import selectedSeriesReducer from "./selectedSeriesSlice";
+import genreReducer from "./genreSlice";
 
 export default configureStore({
   reducer: {
@@ -12,5 +13,6 @@ export default configureStore({
     movies: moviesReducer,
     series: seriesReducer,
     selectedSeries: selectedSeriesReducer,
+    genre: genreReducer,
   },
 });

@@ -12,13 +12,14 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getMovies } from "../api/getMoviesAPI";
 import { updateSeriesAPI } from "../api/getSeriesAPI";
+import { updateSeries } from "../redux/selectedSeriesSlice";
 import {
   addMovieByDeleteSeries,
   deleteMovieByAddSeries,
 } from "../redux/moviesSlice";
 import { addMovie, deleteMovie } from "../redux/selectedSeriesSlice";
 import { update } from "../redux/seriesSlice";
-import { getAllGenres, setAllGenres } from "../utils/getInfoMovies";
+import { UPDATE_GENRES } from "../redux/genreSlice";
 import MySelectField from "./MySelectField";
 import Skeleton from "./MySkeleton";
 
@@ -38,14 +39,19 @@ export default function BasicModal({ open, setOpen, message, setMessage }) {
   const dispatch = useDispatch();
   const { seriesMovies, series } = useSelector((state) => state.selectedSeries);
   const { loaded, movies } = useSelector((state) => state.movies);
-  const handleClose = () => setOpen(false);
+  const { genres, error } = useSelector((state) => state.genre);
+  // const handleClose = () => setOpen(false);
   const [genre, setGenre] = useState(series?.genre?.split("|") || []);
   const [titleSeries, setTitleSeries] = useState(series?.title || "");
+  const [yearSeries, setYearSeries] = useState(series?.year || "");
   useEffect(() => {
     if (!loaded) dispatch(getMovies());
-  }, [dispatch, loaded]);
-  if (getAllGenres().length === 0 && movies.length > 0) {
-    setAllGenres(movies);
+    if (genres.length === 0) {
+      dispatch(UPDATE_GENRES());
+    }
+  }, [dispatch, loaded, genres.length]);
+  if (error) {
+    return <pre>{JSON.stringify(error)}</pre>;
   }
   const handleClickAddMovieToSeries = (movie) => {
     dispatch(addMovie({ movie }));
@@ -60,11 +66,16 @@ export default function BasicModal({ open, setOpen, message, setMessage }) {
   const submitEditSeries = async () => {
     const {
       data: { data, errors },
-    } = await updateSeriesAPI(series.id, series);
+    } = await updateSeriesAPI(series.id, {
+      ...series,
+      title: titleSeries,
+      year: yearSeries,
+    });
     if (data) {
       setMessage({ data: "sửa series thành công", success: true });
       console.log(data);
       dispatch(update({ data }));
+      dispatch(updateSeries({ series: data }));
     } else if (errors) {
       setMessage({ data: "sửa series thất bại", error: true });
     }
@@ -75,7 +86,7 @@ export default function BasicModal({ open, setOpen, message, setMessage }) {
     <div>
       <Modal
         open={open}
-        onClose={handleClose}
+        // onClose={handleClose}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
       >
@@ -85,6 +96,16 @@ export default function BasicModal({ open, setOpen, message, setMessage }) {
             fullWidth
             value={titleSeries}
             onChange={(e) => setTitleSeries(e.target.value)}
+            variant="standard"
+            autoComplete="off"
+            sx={{ mb: "10px" }}
+          />
+          <TextField
+            label="Năm sản xuất"
+            fullWidth
+            value={yearSeries}
+            onChange={(e) => setYearSeries(e.target.value)}
+            type="number"
             variant="standard"
             autoComplete="off"
             sx={{ mb: "10px" }}
@@ -107,7 +128,7 @@ export default function BasicModal({ open, setOpen, message, setMessage }) {
                     width: "100%",
                     maxWidth: 360,
                     bgcolor: "background.paper",
-                    height: "300px",
+                    height: "280px",
                     overflow: "auto",
                   }}
                 >
@@ -142,7 +163,7 @@ export default function BasicModal({ open, setOpen, message, setMessage }) {
                       width: "100%",
                       maxWidth: 360,
                       bgcolor: "background.paper",
-                      height: "300px",
+                      height: "280px",
                       overflow: "auto",
                     }}
                   >

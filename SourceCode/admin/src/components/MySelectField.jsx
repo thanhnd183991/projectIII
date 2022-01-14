@@ -1,4 +1,4 @@
-import * as React from "react";
+import React, { useEffect } from "react";
 import OutlinedInput from "@mui/material/OutlinedInput";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
@@ -8,8 +8,8 @@ import Select from "@mui/material/Select";
 import Checkbox from "@mui/material/Checkbox";
 import Box from "@mui/material/Box";
 import Chip from "@mui/material/Chip";
-import { getAllGenres } from "../utils/getInfoMovies";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { UPDATE_GENRES } from "../redux/genreSlice";
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
 const MenuProps = {
@@ -28,10 +28,17 @@ export default function MySelectField({
   setFieldValue,
   modal,
 }) {
+  const dispatch = useDispatch();
   const { movies } = useSelector((state) => state.movies);
+  const { genres } = useSelector((state) => state.genre);
+  useEffect(() => {
+    if (genres.length === 0) {
+      dispatch(UPDATE_GENRES());
+    }
+  }, [dispatch, genres.length]);
   let names = [];
   if (name === "genre") {
-    names = getAllGenres();
+    names = genres;
   } else if (name === "content") {
     movies?.forEach((movie) => {
       names.push(`${movie.id}|${movie.title}`);

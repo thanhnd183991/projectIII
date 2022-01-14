@@ -4,17 +4,9 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import React, { useState } from "react";
 
-export default function MyFileField({
-  setFieldValue,
-  src,
-
-  mp4,
-  name,
-  label,
-}) {
-  const [infoFileMp4, setInfoFileMp4] = useState("");
+export default function MyFileField({ setFieldValue, src, mp4, name, label }) {
   const [srcImage, setSrcImage] = useState("");
-  // console.log({ ...value });
+
   return (
     <Box
       sx={{ width: "30%", mx: "auto" }}
@@ -26,11 +18,11 @@ export default function MyFileField({
       {name === "avatar" ? (
         <Avatar
           sx={{ alignSelf: "center", width: 72, height: 72, mb: 1 }}
-          src={srcImage ? srcImage : src}
+          src={srcImage ? String(srcImage) : String(src)}
         />
       ) : src ? (
         <img
-          src={srcImage ? srcImage : src}
+          src={srcImage ? String(srcImage) : String(src)}
           alt={name}
           style={{
             width: "200px",
@@ -39,8 +31,8 @@ export default function MyFileField({
             marginBottom: "5px",
           }}
         />
-      ) : mp4 && infoFileMp4 ? (
-        <Box>{infoFileMp4}</Box>
+      ) : mp4 ? (
+        <Box>{mp4?.name}</Box>
       ) : null}
       <Button
         variant="contained"
@@ -64,12 +56,14 @@ export default function MyFileField({
             fileReader.onload = async () => {
               if (fileReader.readyState === 2) {
                 await setFieldValue(name, e.target.files[0]);
-                if (src) {
+                if (
+                  name === "avatar" ||
+                  name === "image" ||
+                  name === "imageSmall" ||
+                  name === "imageTitle"
+                ) {
                   setSrcImage(String(fileReader.result));
                 }
-                console.log("Done");
-                // console.log(e.target.files[0]);
-                setInfoFileMp4(e.target.files[0].name);
               }
             };
             fileReader.readAsDataURL(e.target.files[0]);

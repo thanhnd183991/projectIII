@@ -1,47 +1,4 @@
 const mongoose = require("mongoose");
-const customUser = mongoose.Schema({
-  id: { type: String },
-  username: { type: String, required: true },
-  email: { type: String, required: true },
-  avatar: { type: String, default: "" },
-});
-
-customUser.method("transform", function () {
-  var obj = this.toObject();
-
-  //Rename fields
-  obj.id = obj._id;
-  delete obj._id;
-
-  return obj;
-});
-
-const customComment = mongoose.Schema({
-  user: {
-    type: customUser,
-  },
-  comment: {
-    type: String,
-  },
-  prevCommentId: {
-    type: String,
-    default: "",
-  },
-  totalChild: {
-    type: Number,
-    default: 0,
-  },
-});
-
-customComment.method("transform", function () {
-  var obj = this.toObject();
-
-  //Rename fields
-  obj.id = obj._id;
-  delete obj._id;
-
-  return obj;
-});
 
 const MovieSchema = new mongoose.Schema(
   {
@@ -61,14 +18,14 @@ const MovieSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-    likes: {
-      type: [customUser],
-      default: [],
-    },
-    comments: {
-      type: [customComment],
-      default: [],
-    },
+    likes: [{ type: mongoose.Schema.ObjectId, ref: "User" }],
+    comments: [
+      {
+        data: String,
+        createdBy: { type: mongoose.Schema.ObjectId, ref: "User" },
+        createdAt: { type: Date, default: Date.now() },
+      },
+    ],
   },
   { timestamps: true }
 );

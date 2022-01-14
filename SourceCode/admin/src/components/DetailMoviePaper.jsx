@@ -8,10 +8,12 @@ import MySelectField from "./MySelectField";
 import { updateMovieAPI } from "../api/getMoviesAPI";
 import { toErrorMap } from "../utils/toErrorMap";
 import MyAlert from "./MyAlert";
-import { useDispatch } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import Skeleton from "./MySkeleton";
 import { update } from "../redux/moviesSlice";
+import { socket } from "../App";
 const DetailMoviePaper = ({ movie }) => {
+  const { userInfo } = useSelector((state) => state.auth);
   const [success, setSuccess] = useState(null);
   const dispatch = useDispatch();
   return (
@@ -43,6 +45,7 @@ const DetailMoviePaper = ({ movie }) => {
             // make async call
 
             try {
+              const oldTitle = movie.title;
               let formData = new FormData();
               formData.append("title", data.title);
               formData.append("desc", data.desc);
@@ -60,7 +63,7 @@ const DetailMoviePaper = ({ movie }) => {
                 setErrors(toErrorMap(response.data.errors));
               } else {
                 // console.log(response);
-                if (response.data.data.isSeries != true) {
+                if (response.data.data.isSeries !== true) {
                   dispatch(
                     update({
                       data: response.data.data,
@@ -68,6 +71,11 @@ const DetailMoviePaper = ({ movie }) => {
                   );
                 }
                 data.duration = response.data.data.duration;
+                socket.emit("editMovie", {
+                  movieID: movie.id,
+                  oldTitle,
+                  username: userInfo.username,
+                });
                 setSuccess("sửa phim thành công");
               }
             } catch (err) {

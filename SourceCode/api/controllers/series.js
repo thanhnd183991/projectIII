@@ -137,6 +137,7 @@ const searchSeries = async (req, res) => {
 //CREATE
 const createSeries = async (req, res) => {
   try {
+    // console.log(req.body);
     const checkSeries = await Series.findOne({ title: req.body.title });
     if (checkSeries) {
       return res.json({
@@ -164,10 +165,11 @@ const createSeries = async (req, res) => {
 //UPDATE
 const updateSeries = async (req, res) => {
   try {
-    let series = await Series.findById(req.params.id);
+    // console.log(req.body);
+    let series = await Series.findById(req.params.id || req.body.id);
     series.title = req.body.title || series.title;
     const checkSeries = await Series.findOne({ title: series.title });
-    console.log(checkSeries._id, " ", series._id);
+    // console.log(checkSeries._id, " ", series._id);
     if (checkSeries && String(checkSeries._id) != String(series._id)) {
       return res.json({
         errors: [{ message: "title đã được sử dụng", field: "title" }],
@@ -193,6 +195,7 @@ const updateSeries = async (req, res) => {
       });
     });
     series.content = req.body.content || series.content;
+    series.year = req.body.year || series.year;
     series = await series.save();
     res.status(200).json({ statusCode: 200, data: convertId(series) });
   } catch (err) {

@@ -6,7 +6,7 @@ import Comments from "../components/Comments";
 import VideoPlayer from "../components/VideoPlayer";
 import Layout from "../components/Layout";
 import { useParams } from "react-router-dom";
-import { getDetail } from "../api/getDetailAPI";
+import { getDetail } from "../redux/detailSlice";
 import { useDispatch, useSelector } from "react-redux";
 
 const DetailMovie = () => {

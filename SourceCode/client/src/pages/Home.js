@@ -4,7 +4,7 @@ import Aside from "../components/Aside";
 import Contents from "../components/Contents";
 import Layout from "../components/Layout";
 import Slider from "../components/Slider";
-import { getHome, getPageHome } from "../api/getHomeAPI";
+import { getHome, getPageHome } from "../redux/homeSlice";
 import { useSelector, useDispatch } from "react-redux";
 import queryString from "query-string";
 import { useLocation } from "react-router-dom";
@@ -13,14 +13,16 @@ const Home = () => {
   const dispatch = useDispatch();
   const location = useLocation();
   const { page } = queryString.parse(location?.search);
-  const { contentMovies, asideMovies, pending, pendingPage } = useSelector(
-    (state) => state.home
-  );
+  const { contentMovies, asideMovies, pending, pendingPage, error } =
+    useSelector((state) => state.home);
   useEffect(() => {
     if (page) {
       dispatch(getPageHome(page));
     } else dispatch(getHome(1));
   }, [dispatch, page]);
+  if (error) {
+    return <pre>{JSON.stringify(error)}</pre>;
+  }
   return (
     <Layout>
       <Slider pending={pending} />

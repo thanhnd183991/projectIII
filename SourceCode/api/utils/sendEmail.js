@@ -40,6 +40,7 @@ const sendEmail = async (toEmail, userID) => {
       return rs;
     }
   } catch (error) {
+    console.log(error.message);
     return error.message;
   }
 };

@@ -5,20 +5,18 @@ import { Link } from "react-router-dom";
 import { getMovies } from "../api/getMoviesAPI";
 import Layout from "../components/Layout";
 import MovieTable from "../components/MovieTable";
-import { setAllGenres } from "../utils/getInfoMovies";
+import { UPDATE_GENRES } from "../redux/genreSlice";
 const Movies = () => {
   const dispatch = useDispatch();
   const { loaded, movies, pending, error } = useSelector(
     (state) => state.movies
   );
+  const { genres } = useSelector((state) => state.genre);
 
   useEffect(() => {
     if (!loaded) dispatch(getMovies());
-  }, [loaded, dispatch]);
-
-  if (movies) {
-    setAllGenres(movies);
-  }
+    if (genres.length === 0) dispatch(UPDATE_GENRES());
+  }, [loaded, dispatch, genres.length]);
 
   if (error) {
     return <pre>{JSON.stringify(error)}</pre>;

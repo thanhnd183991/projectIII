@@ -1,8 +1,8 @@
 const { unlink } = require("fs/promises");
 
-const deleteFile = async (filePath) => {
+const deleteFile = (filePath) => {
   try {
-    await unlink(filePath);
+    unlink(filePath);
     // console.log(`successfully deleted ${filePath}`);
   } catch (error) {
     console.error("there was an error:", error.message);

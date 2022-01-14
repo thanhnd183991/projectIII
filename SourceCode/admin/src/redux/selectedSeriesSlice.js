@@ -30,6 +30,9 @@ export const selectedSeriesSlice = createSlice({
         1
       );
     },
+    updateSeries: (state, action) => {
+      state.series = action.payload.series;
+    },
   },
   extraReducers: {
     [getSelectedSeries.pending]: (state) => {
@@ -56,5 +59,6 @@ export const selectedSeriesSlice = createSlice({
     },
   },
 });
-export const { addMovie, deleteMovie } = selectedSeriesSlice.actions;
+export const { addMovie, deleteMovie, updateSeries } =
+  selectedSeriesSlice.actions;
 export default selectedSeriesSlice.reducer;

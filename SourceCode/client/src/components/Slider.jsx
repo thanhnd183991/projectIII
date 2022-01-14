@@ -4,7 +4,7 @@ import queryString from "query-string";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation } from "react-router-dom";
-import { getHome } from "../api/getHomeAPI";
+import { getHome } from "../redux/homeSlice";
 import GroupDots from "./GroupDots";
 import Slide from "./Slide";
 import Skeleton from "./MySkeleton";

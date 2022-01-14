@@ -1,11 +1,20 @@
+import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { Paper } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import React from "react";
+import { useSelector } from "react-redux";
+import { socket } from "../App";
+import { isValidToken } from "../utils/jwt";
 import { CardTitle } from "./CardContent";
 import Skeleton from "./MySkeleton";
-
 const VideoPlayer = ({ watch, movie, pending }) => {
+  const { userInfo } = useSelector((state) => state.auth);
+  const handleLikeMovie = (movie) => {
+    if (userInfo && isValidToken(userInfo.accessToken).isValid)
+      socket.emit("like", { userID: userInfo.id, movieID: movie.id });
+    return;
+  };
   return (
     <VideoPlayerContainer>
       {pending ? (
@@ -13,7 +22,9 @@ const VideoPlayer = ({ watch, movie, pending }) => {
       ) : (
         <>
           <VideoTitle>
-            {watch ? `Xem phim ${movie.title}` : `Trailer ${movie.title}`}
+            {watch
+              ? `Xem phim ${movie.title || ""}`
+              : `Trailer ${movie.title || ""}`}
           </VideoTitle>
           <Video
             progress={"true"}
@@ -35,8 +46,8 @@ const VideoPlayer = ({ watch, movie, pending }) => {
                   <VisibilityIcon />
                   {movie.views}
                 </VideoPlayerReact>
-                <VideoPlayerReact>
-                  <VisibilityIcon />
+                <VideoPlayerReact onClick={() => handleLikeMovie(movie)}>
+                  <ThumbUpIcon />
                   {movie?.likes?.length}
                 </VideoPlayerReact>
               </VideoPlayerInteraction>
@@ -69,7 +80,7 @@ const VideoTitle = styled("div")(({ theme }) => ({
 }));
 
 const Video = styled("video")(({ theme }) => ({
-  objectFit: "cover",
+  objectFit: "contain",
   height: "400px",
 }));
 
@@ -84,7 +95,10 @@ const VideoPlayerReact = styled("div")(({ theme }) => ({
   alignItems: "center",
   alignSelf: "center",
   gap: "5px",
+  cursor: "pointer",
 }));
 
-const VideoPlayerDesc = styled("div")(({ theme }) => ({}));
+const VideoPlayerDesc = styled("div")(({ theme }) => ({
+  wordBreak: "break-word",
+}));
 export default VideoPlayer;

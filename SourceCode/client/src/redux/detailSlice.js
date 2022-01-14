@@ -1,5 +1,37 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { getDetail } from "../api/getDetailAPI";
+import API from "../utils/axios";
+import { createAsyncThunk } from "@reduxjs/toolkit";
+
+export const getDetail = createAsyncThunk(
+  "detail/getDetail",
+  async (movieId) => {
+    try {
+      // console.log("vao");
+      const responseDetailMovie = API.get(`/movies/find/${movieId}`);
+      const responseDetailAsideMovies = API.get(
+        `/movies/search?movieId=${movieId}`
+      );
+      const response = await Promise.all([
+        responseDetailMovie,
+        responseDetailAsideMovies,
+      ]);
+      // console.log("response", response);
+      if (response[0].data.errors || response[1].data.errors) {
+        return {
+          error: response[0].data.errors || response[1].data.errors,
+        };
+      }
+      return {
+        movie: response[0].data.data,
+        asideMovies: response[1].data.data,
+      };
+    } catch (err) {
+      return {
+        error: err.message,
+      };
+    }
+  }
+);
 
 export const detailSlice = createSlice({
   name: "detail",
@@ -9,7 +41,14 @@ export const detailSlice = createSlice({
     pending: null,
     error: null,
   },
-  reducers: {},
+  reducers: {
+    UPDATE_COMMENT: (state, action) => {
+      state.movie.comments.unshift(action.payload);
+    },
+    UPDATE_LIKE: (state, action) => {
+      state.movie.likes = action.payload;
+    },
+  },
   extraReducers: {
     [getDetail.pending]: (state) => {
       state.pending = true;
@@ -27,4 +66,6 @@ export const detailSlice = createSlice({
     },
   },
 });
+
+export const { UPDATE_COMMENT, UPDATE_LIKE } = detailSlice.actions;
 export default detailSlice.reducer;

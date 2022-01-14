@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Link, Typography } from "@mui/material";
+import { Box, Button, Grid, Typography, Link } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { Form, Formik } from "formik";
 import React, { useState } from "react";
@@ -6,7 +6,7 @@ import MyTextField from "../components/MyTextField";
 import validateRegister from "../utils/validateRegister";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { loginAPI, registerAPI } from "../api/authAPI";
+import { loginUser, registerUser } from "../functions/userFunctions";
 import { login } from "../redux/authSlice";
 import { toErrorMap } from "../utils/toErrorMap";
 
@@ -85,9 +85,9 @@ const Login = () => {
               let response = null;
               const { username, email, password } = data;
               if (isRegister) {
-                response = await registerAPI({ username, email, password });
+                response = await registerUser({ username, email, password });
               } else {
-                response = await loginAPI({ email, password });
+                response = await loginUser({ email, password });
               }
               if (response.data?.statusCode / 100 !== 2) {
                 setErrors(toErrorMap(response.data.errors));
@@ -124,9 +124,19 @@ const Login = () => {
                 </div>
                 <Grid container>
                   <Grid item xs>
-                    <Link href="/forgot-password" variant="body2">
+                    <Box
+                      onClick={() => navigate("/forgot-password")}
+                      style={{
+                        fontSize: "0.875rem",
+                        lineHeight: 1.43,
+                        letterSpacing: "0.01071em",
+                        color: "#90caf9",
+                        textDecoration: "underline",
+                        cursor: "pointer",
+                      }}
+                    >
                       Quên mật khẩu?
-                    </Link>
+                    </Box>
                   </Grid>
                   <Grid item>
                     <Link

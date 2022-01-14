@@ -38,4 +38,9 @@ export const validationMovieSchema = yup.object({
 
 export const validationSeriesSchema = yup.object({
   title: yup.string().required("trường nhan đề bắt buộc"),
+  year: yup
+    .number()
+    .min(1800, "năm lớn hơn 1800")
+    .max(2022, "năm nhỏ hơn 2022")
+    .required("trường bắt buộc"),
 });

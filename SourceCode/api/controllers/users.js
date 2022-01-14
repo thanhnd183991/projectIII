@@ -118,7 +118,9 @@ const allUsers = async (req, res) => {
   if (req.user.isAdmin) {
     try {
       // total = await User.countDocuments({});
-      const users = await User.find().select({ password: 0 }).sort({ _id: -1 });
+      const users = await User.find({ isAdmin: false })
+        .select({ password: 0 })
+        .sort({ _id: -1 });
       // .limit(LIMIT)
       // .skip(startIndex);
       return res.status(200).json({

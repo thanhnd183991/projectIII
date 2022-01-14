@@ -2,7 +2,7 @@ import { DeleteOutline } from "@mui/icons-material";
 import ModeEditIcon from "@mui/icons-material/ModeEdit";
 import { Box } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
-import React, { useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import Skeleton from "./MySkeleton";
 import { useDispatch } from "react-redux";

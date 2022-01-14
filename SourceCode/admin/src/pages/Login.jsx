@@ -3,9 +3,9 @@ import { Form, Formik } from "formik";
 import React from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { loginAPI } from "../api/authAPI";
 import MyTextField from "../components/MyTextField";
 import { login } from "../redux/authSlice";
+import { loginAPI } from "../api/authAPI";
 import { toErrorMap } from "../utils/toErrorMap";
 import { validationLoginSchema } from "../utils/validate";
 
@@ -60,12 +60,9 @@ const Login = () => {
               }
               setSubmitting(false);
               if (response.data.data) {
+                console.log("vao");
                 dispatch(login(response.data?.data));
-                localStorage.setItem(
-                  "userInfo",
-                  JSON.stringify(response.data.data)
-                );
-                navigate("/users");
+                navigate("/");
               }
             }}
           >

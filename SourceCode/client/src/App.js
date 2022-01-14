@@ -18,7 +18,12 @@ import Navbar from "./components/Navbar";
 import { CssBaseline } from "@mui/material";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import "./App.css";
-import { useSelector } from "react-redux";
+import { io } from "socket.io-client";
+import { isValidToken } from "./utils/jwt";
+const REACT_APP_SOCKET_ENDPOINT = "http://localhost:5000";
+export const socket = io(REACT_APP_SOCKET_ENDPOINT);
+export const userSocket = io(`${REACT_APP_SOCKET_ENDPOINT}/user`);
+
 const darkTheme = createTheme({
   palette: {
     mode: "dark",
@@ -26,7 +31,11 @@ const darkTheme = createTheme({
 });
 
 const App = () => {
-  const { userInfo } = useSelector((state) => state.auth);
+  console.log(
+    isValidToken(localStorage.getItem("accessToken")).isValid
+      ? "true app"
+      : "false app"
+  );
   return (
     <div>
       <CssBaseline />
@@ -38,18 +47,15 @@ const App = () => {
             <Route exact path="/home" element={<Home />} />
             <Route exact path="/login" element={<Login />} />
             <Route exact path="/forgot-password" element={<ForgotPassword />} />
+            <Route
+              exact
+              path="/change_password/:token"
+              element={<ForgotPassword />}
+            />
             <Route exact path="/search" element={<SearchMovie />} />
             <Route exact path="/detail/:movieId" element={<DetailMovie />} />
-            <Route
-              exact
-              path="/watch/:id"
-              element={userInfo.id ? <WatchMovie /> : <Login />}
-            />
-            <Route
-              exact
-              path="/userInfo/"
-              element={userInfo.id ? <User /> : <Login />}
-            />
+            <Route exact path="/watch/:movieId" element={<WatchMovie />} />
+            <Route exact path="/userInfo/" element={<User />} />
           </Routes>
         </Router>
       </ThemeProvider>

@@ -6,14 +6,35 @@ import { useSelector } from "react-redux";
 import Comment from "./Comment";
 import Skeleton from "./MySkeleton";
 import AccountCircle from "@mui/icons-material/AccountCircle";
+import { useNavigate } from "react-router-dom";
+import { socket } from "../App";
+import { useDispatch } from "react-redux";
+import { isValidToken } from "../utils/jwt";
+import { logout } from "../redux/authSlice";
+import { DELETE_ALL_NOTIFICATION } from "../redux/notificationSlice";
 
 const Comments = ({ movie, pending }) => {
   const [inputComment, setInputComment] = useState("");
   const { userInfo } = useSelector((state) => state.auth);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleComment = async (e) => {
-    e.preventDefault();
-    console.log(inputComment);
+    if (
+      localStorage.getItem("accessToken") &&
+      isValidToken(localStorage.getItem("accessToken")).isValid
+    ) {
+      socket.emit("comment", {
+        userID: userInfo.id,
+        movieID: movie.id,
+        data: inputComment,
+      });
+    } else {
+      dispatch(DELETE_ALL_NOTIFICATION());
+      dispatch(logout());
+
+      navigate("/login");
+    }
   };
 
   return (
@@ -39,7 +60,7 @@ const Comments = ({ movie, pending }) => {
         {pending
           ? Array(3)
               .fill("0")
-              .map((_, i) => <Skeleton width="100%" height="64px" />)
+              .map((_, i) => <Skeleton key={i} width="100%" height="64px" />)
           : movie?.comments?.map((comment) => (
               <Comment key={comment._id} comment={comment} />
             ))}

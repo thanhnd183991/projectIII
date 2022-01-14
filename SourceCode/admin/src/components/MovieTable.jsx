@@ -34,7 +34,7 @@ export default function MovieTable({ data, loaded, pending }) {
     {
       field: "likes",
       headerName: "Lượt thích",
-      width: 100,
+      sortable: false,
       renderCell: (params) => {
         return <div>{params.row.likes.length}</div>;
       },
@@ -43,9 +43,10 @@ export default function MovieTable({ data, loaded, pending }) {
     {
       field: "comments",
       headerName: "Lượt bình luận",
+      sortable: false,
       width: 100,
       renderCell: (params) => {
-        return <div>{params.row.likes.length}</div>;
+        return <div>{params.row.comments.length}</div>;
       },
     },
     {

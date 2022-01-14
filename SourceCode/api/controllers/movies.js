@@ -11,6 +11,9 @@ const {
 const msToHMS = require("../utils/convertTime");
 const { getVideoDurationInSeconds } = require("get-video-duration");
 const allGenres = require("../utils/getAllGenres");
+const mongoose = require("mongoose");
+const redis = require("../config/redis.js");
+const { ALL_GENRES_REDIS } = require("../constants");
 
 //CREATE
 const createMovie = async (req, res) => {
@@ -98,7 +101,6 @@ const createMovie = async (req, res) => {
 };
 
 //UPDATE
-
 const updateMovie = async (req, res) => {
   upload(req, res, async (err) => {
     if (err) {
@@ -185,22 +187,16 @@ const updateMovie = async (req, res) => {
 };
 
 //DELETE
-
 const deleteMovie = async (req, res) => {
   try {
     const rs = await Movie.findById(req.params.id);
-    if (rs.isSeries) {
-      const series = await Series.findById(rs.idSeries);
-      series.content = series?.content.filter((el) => el != rs._id);
-      await series.save();
-      await rs.delete();
-    }
     if (!rs) {
       return res.json({
         statusCode: 404,
         errors: [{ field: "id", message: "không tim thấy phim" }],
       });
     }
+    await rs.delete();
     res.status(200).json({
       statusCode: 200,
       data: { message: "The movie has been deleted..." },
@@ -226,13 +222,25 @@ const getMoviesByArrayId = async (req, res) => {
     });
   }
 };
-//GET
 
+//GET
 const getMovie = async (req, res) => {
   // console.log(req.params.id);
   try {
-    const movie = await Movie.findById(req.params.id);
+    const movie = await Movie.findById(req.params.id)
+      .populate({
+        path: "comments.createdBy",
+      })
+      .populate({ path: "likes" });
     // const movie = await Movie.find({ title: req.query.title }).exec();
+    movie.comments = movie.comments.reverse();
+    if (movie.isSeries) {
+      const tmpMovieSeries = await Series.findById(movie?.idSeries);
+      movie._doc.movieSeries = tmpMovieSeries;
+      stt = tmpMovieSeries.content.findIndex((v) => v === String(movie._id));
+      movie._doc.stt = stt + 1;
+    }
+    // console.log(movie);
     res.status(200).json({ data: convertId(movie), statusCode: 200 });
   } catch (err) {
     return res.json({
@@ -243,15 +251,21 @@ const getMovie = async (req, res) => {
 };
 
 //GET RANDOM
-
 const getRandomMovie = async (req, res) => {
   const type = req.query.type;
+  const limit = req.query.limit;
+  // console.log(limit);
   let movies;
   try {
     if (type === "series") {
       movies = await Movie.aggregate([
         { $match: { isSeries: true } },
         { $sample: { size: 10 } },
+      ]);
+    } else if (limit) {
+      movies = await Movie.aggregate([
+        { $match: { isSeries: false } },
+        { $sample: { size: Number(limit) } },
       ]);
     } else {
       movies = await Movie.aggregate([
@@ -269,21 +283,48 @@ const getRandomMovie = async (req, res) => {
 };
 
 //GET ALL GENRES
-
 const getAllGenres = async (req, res) => {
   try {
-    const genres = await Movie.find().select({ genre: 1 });
+    let data = null;
+    if (redis) {
+      const payload = await redis.get(ALL_GENRES_REDIS);
+      if (payload) {
+        console.log(payload);
+        data = payload;
+        return res.status(200).json({ statusCode: 200, data });
+      } else {
+        const genres = await Movie.find().select({ genre: 1 });
 
-    const data = allGenres(genres).sort(function (a, b) {
-      return a.localeCompare(b);
-    });
-    if (data[0] === "(no genres listed)") {
-      data.shift();
-      data.push("(no genres listed)");
+        data = allGenres(genres).sort(function (a, b) {
+          return a.localeCompare(b);
+        });
+        if (data[0] === "(no genres listed)") {
+          data.shift();
+          data.push("(no genres listed)");
+        }
+        // console.log(data);
+        await redis.set(
+          ALL_GENRES_REDIS,
+          data.join("|"),
+          "ex",
+          1000 * 60 * 60 * 24 * 7 // a week
+        );
+      }
+    } else {
+      const genres = await Movie.find().select({ genre: 1 });
+
+      data = allGenres(genres).sort(function (a, b) {
+        return a.localeCompare(b);
+      });
+      if (data[0] === "(no genres listed)") {
+        data.shift();
+        data.push("(no genres listed)");
+      }
     }
-    // console.log(data);
+
+    console.log(data);
     res.status(200).json({
-      data,
+      data: data.join("|"),
     });
   } catch (err) {
     return res.json({
@@ -419,51 +460,110 @@ const viewMovie = async (req, res) => {
 
 // LIKE MOVIE
 
+// const likeMovie = async (req, res) => {
+//   // console.log(req.user);
+//   const { id: userID } = req.user;
+//   const { id: movieID } = req.params;
+//   const user = await User.findById(userID);
+//   if (user) {
+//     const userLike = {
+//       id: userID,
+//       username: user.username,
+//       email: user.email,
+//       avatar: user.avatar,
+//     };
+//     let movie = await Movie.findById(movieID);
+//     // console.log(movie);
+
+//     if (movie) {
+//       if (movie.likes.length === 0) {
+//         movie.likes.push(userLike);
+//         movie = await movie.save();
+//         // console.log("moive", movie);
+//         return res
+//           .status(200)
+//           .json({ statusCode: 200, data: convertId(movie) });
+//       } else {
+//         const result = movie.likes.find(({ id }) => id === userLike.id);
+//         console.log(result.id);
+//         if (result.id) {
+//           movie.likes = movie.likes.filter(
+//             ({ id }) => String(id) !== String(userLike.id)
+//           );
+//         } else {
+//           movie.likes.push(userLike);
+//         }
+//         movie = await movie.save();
+//         // console.log("moive", movie);
+//         return res
+//           .status(200)
+//           .json({ statusCode: 200, data: convertId(movie) });
+//       }
+//     } else {
+//       res.json({
+//         statusCode: 404,
+//         errors: [{ field: "movieId", message: "movie not found" }],
+//       });
+//     }
+//   } else {
+//     res.json({
+//       statusCode: 404,
+//       errors: [{ field: "userId", message: "user not found" }],
+//     });
+//   }
+// };
+
+//NEW LIKE
 const likeMovie = async (req, res) => {
   // console.log(req.user);
   const { id: userID } = req.user;
   const { id: movieID } = req.params;
   const user = await User.findById(userID);
   if (user) {
-    const userLike = {
-      id: userID,
-      username: user.username,
-      email: user.email,
-      avatar: user.avatar,
-    };
-    let movie = await Movie.findById(movieID);
-    // console.log(movie);
+    // const userLike = {
+    //   id: userID,
+    //   username: user.username,
+    //   email: user.email,
+    //   avatar: user.avatar,
+    // };
 
-    if (movie) {
-      if (movie.likes.length === 0) {
-        movie.likes.push(userLike);
-        movie = await movie.save();
-        // console.log("moive", movie);
-        return res
-          .status(200)
-          .json({ statusCode: 200, data: convertId(movie) });
-      } else {
-        const result = movie.likes.find(({ id }) => id === userLike.id);
-        console.log(result.id);
-        if (result.id) {
-          movie.likes = movie.likes.filter(
-            ({ id }) => String(id) !== String(userLike.id)
-          );
-        } else {
-          movie.likes.push(userLike);
-        }
-        movie = await movie.save();
-        // console.log("moive", movie);
-        return res
-          .status(200)
-          .json({ statusCode: 200, data: convertId(movie) });
-      }
-    } else {
-      res.json({
-        statusCode: 404,
-        errors: [{ field: "movieId", message: "movie not found" }],
+    const checkMovie = await Movie.findOne({
+      _id: movieID,
+      likes: { $in: [userID] },
+    });
+    let movie = {};
+    if (checkMovie) {
+      movie = await Movie.findByIdAndUpdate(
+        movieID,
+        {
+          $pull: {
+            likes: userID,
+          },
+        },
+        { new: true }
+      ).populate({
+        path: "likes",
       });
+    } else {
+      movie = await Movie.findByIdAndUpdate(
+        movieID,
+        {
+          $push: {
+            likes: userID,
+          },
+        },
+        { new: true }
+      )
+        .populate({
+          path: "likes",
+        })
+        .populate({
+          path: "comments.createdBy",
+        });
     }
+    return res.json({
+      data: convertId(movie),
+    });
   } else {
     res.json({
       statusCode: 404,
@@ -477,55 +577,36 @@ const likeMovie = async (req, res) => {
 const commentMovie = async (req, res) => {
   const { id: userID } = req.user;
   const { id: movieID } = req.params;
+  const { data } = req.query;
   const user = await User.findById(userID);
   if (user) {
-    const userComment = {
-      id: userID,
-      username: user.username,
-      email: user.email,
-      avatar: user.avatar,
-    };
-    const customComment = {
-      user: userComment,
-      comment: req.body.comment,
-      prevCommentId: req.body.previousCommentId
-        ? req.body.prevCommentId
-        : "root",
-    };
-    let movie = await Movie.findById(movieID);
-    // console.log(movie);
-
-    if (movie) {
-      if (movie.comments.length === 0) {
-        movie.comments.push(customComment);
-        movie = await movie.save();
-        // console.log("moive", movie);
-        return res
-          .status(200)
-          .json({ statusCode: 200, data: convertId(movie) });
-      } else {
-        const result = movie.comments.find(
-          ({ user }) => user.id === userComment.id
-        );
-        if (result.id) {
-          movie.comments = movie.comments.filter(
-            ({ user }) => String(user.id) !== String(userComment.id)
-          );
-        } else {
-          movie.comments.push(customComment);
-        }
-        movie = await movie.save();
-        // console.log("moive", movie);
-        return res
-          .status(200)
-          .json({ statusCode: 200, data: convertId(movie) });
-      }
-    } else {
-      res.json({
+    const movie = await Movie.findByIdAndUpdate(
+      movieID,
+      {
+        $push: {
+          comments: {
+            data: data,
+            createdBy: mongoose.Types.ObjectId(userID),
+          },
+        },
+      },
+      { new: true }
+    )
+      .populate({
+        path: "comments.createdBy",
+      })
+      .populate({
+        path: "likes",
+      });
+    if (!movie) {
+      return res.json({
         statusCode: 404,
         errors: [{ message: "movie not found", field: "movieId" }],
       });
     }
+    return res.json({
+      data: convertId(movie),
+    });
   } else {
     res.json({
       statusCode: 404,

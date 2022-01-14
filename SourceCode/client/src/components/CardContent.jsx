@@ -1,8 +1,10 @@
 import { styled } from "@mui/material/styles";
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 
-const CardContent = ({ movie, inDetail }) => {
+const CardContent = ({ movie, titleSeries, inDetail }) => {
   const navigate = useNavigate();
   return (
     <CardContainer>
@@ -15,25 +17,32 @@ const CardContent = ({ movie, inDetail }) => {
             Xem
           </CardContentWatchButton>
         ) : (
-          <>
-            <CardTitle>{movie.title}</CardTitle>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              // gap: "5px",
+              justifyContent: "space-between",
+            }}
+          >
+            <CardTitle>{titleSeries ? titleSeries : movie.title}</CardTitle>
             <CardInteraction>
-              {/* <CardReact>
+              <CardReact>
                 <VisibilityIcon />
                 <div>{movie.views}</div>
               </CardReact>
               <CardReact>
                 <ThumbUpIcon />
                 <div>{movie.likes.length}</div>
-              </CardReact> */}
-              <CardReact>
+              </CardReact>
+              {/* <CardReact>
                 <div>{movie.isSeries ? "true" : "false"}</div>
               </CardReact>
               <CardReact>
                 <div>{movie.year}</div>
-              </CardReact>
+              </CardReact> */}
             </CardInteraction>
-          </>
+          </div>
         )}
       </CardInner>
     </CardContainer>
@@ -61,7 +70,9 @@ const CardImage = styled("img")(({ theme }) => ({
   left: "50%",
   transform: "translate(-50%, -0%)",
   "&:hover": {
-    transform: "scale(1.1) translate(-45%, -0%)",
+    // transform: "scale(1.005) translate(-49%, -0%)",
+
+    filter: "brightness(0.75)",
   },
 }));
 

@@ -5,7 +5,6 @@ import Layout from "../components/Layout";
 import MySelectField from "../components/MySelectField";
 import MyTextField from "../components/MyTextField";
 import { useDispatch, useSelector } from "react-redux";
-import { setAllGenres } from "../utils/getInfoMovies";
 import { getMovies } from "../api/getMoviesAPI";
 import { validationSeriesSchema } from "../utils/validate";
 import { toErrorMap } from "../utils/toErrorMap";
@@ -13,18 +12,18 @@ import MyAlert from "../components/MyAlert";
 import { update } from "../redux/seriesSlice";
 import { createSeriesAPI } from "../api/getSeriesAPI";
 import { updateByCreateSeries } from "../redux/moviesSlice";
+import { UPDATE_GENRES } from "../redux/genreSlice";
 const CreateSeries = () => {
   const dispatch = useDispatch();
   const [success, setSuccess] = useState(null);
-  const { loaded, movies, error } = useSelector((state) => state.movies);
+  const { loaded, error } = useSelector((state) => state.movies);
+  const { genres } = useSelector((state) => state.genre);
 
   useEffect(() => {
     if (!loaded) dispatch(getMovies());
-  }, [loaded, dispatch]);
+    if (genres.length === 0) dispatch(UPDATE_GENRES());
+  }, [loaded, dispatch, genres.length]);
 
-  if (movies) {
-    setAllGenres(movies);
-  }
   if (error) {
     return <pre>{JSON.stringify(error)}</pre>;
   }
@@ -35,6 +34,7 @@ const CreateSeries = () => {
         validateOnChange={true}
         initialValues={{
           title: "",
+          year: "",
           genre: [],
           content: [],
         }}
@@ -54,6 +54,7 @@ const CreateSeries = () => {
               title: data.title,
               content,
               genre,
+              year: data.year,
             });
             if (response.data.errors) {
               setErrors(toErrorMap(response.data.errors));
@@ -65,7 +66,7 @@ const CreateSeries = () => {
                 })
               );
               // update movies
-              dispatch(updateByCreateSeries({ data: data.content }));
+              dispatch(updateByCreateSeries({ data: content }));
               setSuccess("tạo phim thành công");
               resetForm();
             }
@@ -86,6 +87,7 @@ const CreateSeries = () => {
             }}
           >
             <MyTextField label="Tên series" name="title" isSeries />
+            <MyTextField label="Năm sản xuất" name="year" type="number" />
             <MySelectField
               label="Thể loại"
               name="genre"

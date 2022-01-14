@@ -6,8 +6,10 @@ import { CardTitle, CardInteraction, CardReact } from "./CardContent";
 import { styled } from "@mui/material/styles";
 import { Paper } from "@mui/material";
 import Skeleton from "./MySkeleton";
+import { useNavigate } from "react-router-dom";
 
 const InfoMovie = ({ movie, pending }) => {
+  const navigate = useNavigate();
   return (
     <InfoMovieContainer>
       {pending ? (
@@ -32,12 +34,38 @@ const InfoMovie = ({ movie, pending }) => {
               >
                 {movie.title}{" "}
               </div>
-              <InfoMovieSubTitle>{movie.year} </InfoMovieSubTitle>
+              {movie.movieSeries ? (
+                <InfoMovieSubTitle style={{ fontWeight: "bold" }}>
+                  Thuộc series: {movie?.movieSeries.title}
+                  {" - tập "}
+                  {movie?.stt}
+                </InfoMovieSubTitle>
+              ) : (
+                <InfoMovieSubTitle style={{ fontWeight: "bold" }}>
+                  Phim lẻ
+                </InfoMovieSubTitle>
+              )}
+              <InfoMovieSubTitle>Năm sản xuất: {movie.year} </InfoMovieSubTitle>
               <InfoMovieSubTitle>
-                {movie.genre?.split("|").join(", ")}{" "}
+                Thể loại:
+                {/* {movie.genre?.split("|").join(", ")}{" "} */}
+                {movie.genre?.split("|").map((el, i) => (
+                  <LinkSpan
+                    key={i}
+                    onClick={() => navigate(`/search?genre=${el}`)}
+                  >
+                    {el}
+                    {", "}
+                  </LinkSpan>
+                ))}
               </InfoMovieSubTitle>
-              <InfoMovieSubTitle>{movie?.duration} </InfoMovieSubTitle>
-              <CardTitle>Tương tác phim:</CardTitle>
+              <InfoMovieSubTitle>
+                Thời lượng: {movie?.duration}{" "}
+              </InfoMovieSubTitle>
+              <InfoMovieSubTitle>Chất lượng: Bản đẹp</InfoMovieSubTitle>
+              <CardTitle style={{ marginBottom: "5px" }}>
+                Tương tác phim:
+              </CardTitle>
               <CardInteraction>
                 <CardReact>
                   <VisibilityIcon />
@@ -69,6 +97,13 @@ const InfoMovieContainer = styled(Paper)(({ theme }) => ({
   marginBottom: "20px",
 }));
 
+const LinkSpan = styled("span")(({ theme }) => ({
+  cursor: "pointer",
+  "&:hover": {
+    color: "gray",
+  },
+}));
+
 const InfoMovieTop = styled("div")(({ theme }) => ({
   display: "flex",
   marginBottom: "10px",
@@ -89,9 +124,11 @@ const InfoMovieTopRight = styled("div")(({ theme }) => ({
 }));
 const InfoMovieSubTitle = styled("div")(({ theme }) => ({
   fontSize: "normal",
+  marginBottom: "5px",
 }));
 const InfoMovieBottom = styled("div")(({ theme }) => ({
   fontSize: "normal",
+  wordBreak: "break-word",
 }));
 
 export default InfoMovie;

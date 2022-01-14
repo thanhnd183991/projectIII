@@ -33,7 +33,7 @@ const Aside = ({ asideMovies, pending }) => {
               ))}
           </>
         ) : (
-          asideMovies.map((movie) => {
+          asideMovies?.map((movie) => {
             return (
               <Grid item xs={6} sm={6} md={12} key={movie.id}>
                 <Link to={`/detail/${movie.id}`}>

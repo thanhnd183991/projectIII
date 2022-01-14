@@ -17,14 +17,16 @@ const CardContainer = styled("div")(({ theme }) => ({
 const CardImageCon = styled("div")(({ theme }) => ({
   height: "108px",
   width: "92px",
-  objectFit: "cover",
   transition: "0.5s",
   overflow: "hidden",
 }));
 
 const CardImage = styled("img")(({ theme }) => ({
-  height: "100%",
-  width: "100%",
+  height: "108px",
+  width: "92px",
+  "&:hover": {
+    transform: "scale(1.1)",
+  },
   objectFit: "cover",
   transition: "0.5s",
   overflow: "hidden",
@@ -41,8 +43,7 @@ const CardTitle = styled("div")(({ theme }) => ({
   fontSize: 14,
   fontWeight: "bold",
   margin: "0",
-  width: "240px",
-  whiteSpace: "nowrap",
+  // whiteSpace: "nowrap",
   overflow: "hidden",
   textOverflow: "ellipsis",
 }));

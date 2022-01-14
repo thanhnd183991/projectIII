@@ -6,7 +6,7 @@ import Layout from "../components/Layout";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation } from "react-router-dom";
 import queryString from "query-string";
-import { getSearch } from "../api/getSearchAPI";
+import { getSearch } from "../redux/searchSlice";
 
 const SeachMovie = () => {
   const location = useLocation();

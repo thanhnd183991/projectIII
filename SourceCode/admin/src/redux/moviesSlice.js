@@ -36,9 +36,10 @@ export const moviesSlice = createSlice({
       if (!state.movies) {
         state.movies = [];
       } else {
+        console.log(action.payload.data);
         action.payload.data.forEach((el) => {
           state.movies.splice(
-            state.movies.findIndex((v) => v.id === el.id),
+            state.movies.findIndex((v) => v.id === el),
             1
           );
         });
@@ -49,6 +50,9 @@ export const moviesSlice = createSlice({
         state.movies = [];
       } else {
         state.movies.push(action.payload);
+        state.movies = action.payload.movies.sort(function (a, b) {
+          return a.title.localeCompare(b.title);
+        });
       }
     },
     deleteMovieByAddSeries: (state, action) => {
@@ -117,6 +121,9 @@ export const moviesSlice = createSlice({
       } else {
         console.log(action.payload);
         state.movies.push.apply(state.movies, action.payload.movies);
+        state.movies = state.movies.sort(function (a, b) {
+          return a.title.localeCompare(b.title);
+        });
         // state.total = action.payload.total;
         // state.numberOfPages = action.payload.numberOfPages;
         // state.currentPage = action.payload.currentPage;

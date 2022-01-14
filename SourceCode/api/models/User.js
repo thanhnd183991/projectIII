@@ -6,6 +6,11 @@ const UserSchema = new mongoose.Schema(
     password: { type: String, required: true },
     avatar: { type: String, default: "" },
     isAdmin: { type: Boolean, default: false },
+    status: {
+      type: String,
+      enum: ["online", "offline"],
+      default: "offline",
+    },
   },
   {
     timestamps: true,

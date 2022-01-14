@@ -1,4 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { userSocket, socket } from "../App";
+import { setSession } from "../utils/jwt";
 
 export const authSlice = createSlice({
   name: "auth",
@@ -15,12 +17,16 @@ export const authSlice = createSlice({
   },
   reducers: {
     logout: (state) => {
-      state.userInfo.id = null;
+      userSocket.emit("sign-out", state.userInfo.id);
+      state.userInfo = {};
       localStorage.clear();
     },
     login: (state, action) => {
       state.userInfo = action.payload;
+      setSession(action.payload.accessToken);
       localStorage.setItem("userInfo", JSON.stringify(action.payload));
+      userSocket.emit("sign-in", state.userInfo.id);
+      socket.emit("enter", { userID: state.userInfo.id });
     },
     update: (state, action) => {
       state.userInfo = action.payload;

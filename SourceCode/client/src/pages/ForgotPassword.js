@@ -1,9 +1,14 @@
-import { Box, Button, Container, Grid, Link, Typography } from "@mui/material";
+import { Box, Button, Container, Grid, Typography } from "@mui/material";
 import { Form, Formik } from "formik";
 import React from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import MyTextField from "../components/MyTextField";
+import axios from "../utils/axios";
+import MyAlert from "../components/MyAlert";
 
 const ForgotPassword = () => {
+  const navigate = useNavigate();
+  const { token } = useParams();
   return (
     <Box
       sx={{
@@ -29,36 +34,60 @@ const ForgotPassword = () => {
           <div style={{ width: "100%" }}>
             <Typography
               component="h1"
-              fullWidth
               variant="h5"
               sx={{ mb: 1, color: "white" }}
             >
-              Bạn quên mật khẩu
+              {token ? "Thay đổi mật khẩu" : "Bạn quên mật khẩu"}
             </Typography>
             <Formik
               validateOnChange={true}
               initialValues={{
-                email: "",
+                text: "",
               }}
-              validate={({ email }) => {
+              validate={({ text }) => {
                 let errors = {};
-                if (email === "") {
-                  errors.email = "mail được yêu cầu";
-                } else if (!email.includes("@")) {
-                  errors.email = "mail bao gồm @";
+                if (text === "") {
+                  errors.email = "trường được yêu cầu";
                 }
                 return errors;
               }}
-              onSubmit={async (data, { setSubmitting }) => {
+              onSubmit={async (data, { setStatus, setSubmitting }) => {
                 setSubmitting(true);
                 // make async call
-                console.log("object", data);
+                let response = null;
+                if (token) {
+                  response = await axios.post("/auth/change-password", {
+                    password: data.text,
+                    token,
+                  });
+                } else {
+                  response = await axios.post("/auth/forgot-password", {
+                    email: data.text,
+                  });
+                }
                 setSubmitting(false);
+                if (!token) {
+                  if (response.data.data) {
+                    setStatus({ success: "vui lòng kiểm tra email của bạn" });
+                  } else {
+                    setStatus({ error: "lỗi không gửi được email" });
+                  }
+                } else {
+                  if (response.data.data) {
+                    setStatus({ success: "cập nhật mật khẩu thành công" });
+                  } else {
+                    setStatus({ error: "lỗi không cập nhật được mật khẩu" });
+                  }
+                }
               }}
             >
-              {({ values, errors, isSubmitting }) => (
+              {({ values, status, errors, isSubmitting }) => (
                 <Form>
-                  <MyTextField label="Email" name="email" />
+                  <MyTextField
+                    label={token ? "Password" : "Email"}
+                    name="text"
+                    type={token ? "password" : "text"}
+                  />
                   <div>
                     <Button
                       type="submit"
@@ -72,11 +101,27 @@ const ForgotPassword = () => {
                   </div>
                   <Grid container>
                     <Grid item xs>
-                      <Link href="/login" variant="body2">
+                      <Box
+                        onClick={() => navigate("/login")}
+                        style={{
+                          fontSize: "0.875rem",
+                          lineHeight: 1.43,
+                          letterSpacing: "0.01071em",
+                          color: "#90caf9",
+                          textDecoration: "underline",
+                          cursor: "pointer",
+                        }}
+                      >
                         Đăng nhập
-                      </Link>
+                      </Box>
                     </Grid>
                   </Grid>
+                  {status && status.error && (
+                    <MyAlert message={status.error} attr="error" />
+                  )}
+                  {status && status.success && (
+                    <MyAlert message={status.success} attr="success" />
+                  )}
                   {/* <pre>{JSON.stringify(values, null, 2)}</pre>
             <pre>{JSON.stringify(errors, null, 2)}</pre> */}
                 </Form>

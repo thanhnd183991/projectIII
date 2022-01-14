@@ -8,8 +8,6 @@ const MyTextField = ({ label, type, disabled, ...props }) => {
     <TextField
       sx={{ my: 1 }}
       label={label}
-      multiline
-      disabled={disabled}
       type={type}
       {...field}
       fullWidth

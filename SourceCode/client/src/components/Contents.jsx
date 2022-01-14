@@ -126,8 +126,11 @@ const Contents = ({
           movies?.map((movie) => {
             return (
               <Grid item xs={6} sm={4} md={4} lg={3} key={movie.id}>
-                <Link to={`/detail/${movie.id}`}>
-                  <CardContent movie={movie.ep1 ? movie.ep1 : movie} />
+                <Link to={`/detail/${movie.ep1 ? movie.ep1.id : movie.id}`}>
+                  <CardContent
+                    titleSeries={movie.title}
+                    movie={movie.ep1 ? movie.ep1 : movie}
+                  />
                 </Link>
               </Grid>
             );

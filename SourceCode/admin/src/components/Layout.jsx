@@ -1,9 +1,8 @@
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import AccountCircle from "@mui/icons-material/AccountCircle";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import MenuIcon from "@mui/icons-material/Menu";
-import NotificationsIcon from "@mui/icons-material/Notifications";
 import MuiAppBar from "@mui/material/AppBar";
-import Badge from "@mui/material/Badge";
+import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -14,12 +13,12 @@ import List from "@mui/material/List";
 import { createTheme, styled, ThemeProvider } from "@mui/material/styles";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
-import Avatar from "@mui/material/Avatar";
-import * as React from "react";
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Link, useNavigate } from "react-router-dom";
+import { login, logout } from "../redux/authSlice";
+import { isValidToken } from "../utils/jwt";
 import { mainListItems } from "./ListItems";
-import { Link } from "react-router-dom";
-import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
 
 const drawerWidth = 240;
 
@@ -72,10 +71,19 @@ const mdTheme = createTheme();
 const Layout = ({ children }) => {
   const { userInfo } = useSelector((state) => state.auth);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [open, setOpen] = React.useState(true);
   const toggleDrawer = () => {
     setOpen(!open);
   };
+  useEffect(() => {
+    if (isValidToken(localStorage.getItem("accessToken")).isValid) {
+      dispatch(login(JSON.parse(localStorage.getItem("userInfo"))));
+    } else {
+      dispatch(logout());
+      navigate("/login");
+    }
+  }, [dispatch, navigate]);
 
   const menuId = "primary-search-account-menu";
   return (
@@ -111,11 +119,11 @@ const Layout = ({ children }) => {
                 Admin ProjectIII
               </Link>
             </Typography>
-            <IconButton color="inherit">
+            {/* <IconButton color="inherit">
               <Badge badgeContent={4} color="secondary">
                 <NotificationsIcon />
               </Badge>
-            </IconButton>
+            </IconButton> */}
             <IconButton
               size="large"
               edge="end"
